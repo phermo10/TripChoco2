@@ -51,7 +51,7 @@ public class Graph implements GraphInterface,Serializable {
 		this(new ArrayList<Place>(), new ArrayList<Path>(), new ArrayList<Tag> (), user);
 	}
 
-	
+
 	public Graph(ArrayList<Place> allplaces, ArrayList<Path> allpaths, ArrayList<Tag> alltags,User user){
 
 		this.allplaces = allplaces;
@@ -91,7 +91,7 @@ public class Graph implements GraphInterface,Serializable {
 				link.put(mesPoints.get(i),p);
 			}
 		}
-		
+
 		for (int i=0;i<mesArcs.size();i++){
 			//time : entre 0 et 30min  ; score : etre 0 et 30
 			Point point1 = mesArcs.get(i)[0];
@@ -231,8 +231,8 @@ public class Graph implements GraphInterface,Serializable {
 	public Route solve() {
 		return new Route();
 			}
-	
-	
+
+
 
 	public void save() throws IOException {
 		/*System.out.println("before serialization:" + this);
@@ -240,11 +240,11 @@ public class Graph implements GraphInterface,Serializable {
 		XMLEncoder encoder = new XMLEncoder(new FileOutputStream("savings" + File.separator +"Graphtest.xml"));
 		encoder.writeObject(this);
 		encoder.close();*/
-		
+
 		//POUR LE TEST UNIQUEMENT
 		//this.user = new User(300,this.getAllplaces().get(1),this.getAllplaces().get(1));
-		
-		
+
+
 		PrintWriter writer =  new PrintWriter(new BufferedWriter
 				(new FileWriter("savings" + File.separator +"Graph" + this.getUser().getId() +".txt")));
 		writer.println("<User>");
@@ -271,7 +271,7 @@ public class Graph implements GraphInterface,Serializable {
 			writer.println(p.getP2().getId());
 			writer.println(p.getTime());
 			writer.println(p.getScore());
-			
+
 		}
 		writer.println("</Paths>");
 		System.out.println("Writing Tags ID");
@@ -280,7 +280,7 @@ public class Graph implements GraphInterface,Serializable {
 			writer.println(t.getId());
 		}
 		writer.println("</Tags>");
-		
+
 		writer.close();
 	}
 
@@ -290,7 +290,7 @@ public class Graph implements GraphInterface,Serializable {
 		JFrame frame = new JFrame(); 
 
 		frame.setSize(new Dimension(xWindow+50,yWindow+50)); 
-		
+
 		ArrayList<Place> allplaces = this.getAllplaces();
 		ArrayList<Path> allpaths = this.getAllpaths();
 		for (Place p : allplaces) {
@@ -299,7 +299,7 @@ public class Graph implements GraphInterface,Serializable {
 		for (Path path : allpaths){
 			System.out.println(path);
 		}
-		
+
 		MonCompo compo = new MonCompo(this.getDispersion());
 		frame.add(compo); 
 		frame.setVisible(true);
@@ -313,12 +313,6 @@ public class Graph implements GraphInterface,Serializable {
 		System.out.println("after deserialization:" + g);
 
 		return g;*/
-		//TO DO : Prendre dans savings\Users\ userid.txt les données sur le User
-				//TO DO : Générer un Graphique à partir du fichier savings\graphiqueid\graphiqueid.txt
-				//TO DO : Ajouter les données de savings\graphiqueid\Useruserid.txt
-				
-		
-		
 		Graph g = new Graph();
 		String filename = "savings" + File.separator +"Graph" + userid +".txt";
 		Scanner reader = new Scanner(new File (filename));
@@ -351,7 +345,7 @@ public class Graph implements GraphInterface,Serializable {
 			Place p = new Place(g,position,placetime,placescore);
 			p.setId(id);
 			placemap.put(id, p);
-			
+
 			toRead=reader.nextLine();
 		}	
 		while (!toRead.equals("</Places>"));
@@ -359,7 +353,7 @@ public class Graph implements GraphInterface,Serializable {
 		g.setUser(user);
 		//<Paths>
 		toRead = reader.nextLine();
-		
+
 		toRead = reader.nextLine();
 		do {
 			int id = Integer.parseInt(toRead);
@@ -371,10 +365,10 @@ public class Graph implements GraphInterface,Serializable {
 			int pathtime = Integer.parseInt(toRead);
 			toRead=reader.nextLine();
 			int pathscore = Integer.parseInt(toRead);
-			
+
 			Path p = new Path (g,id,p1,p2,pathtime,pathscore);
 			toRead = reader.nextLine();
-			
+
 		}
 		while(!toRead.equals("</Paths>"));
 		return g;

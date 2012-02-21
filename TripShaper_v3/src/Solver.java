@@ -17,11 +17,11 @@ public class Solver {
 
 	private int maxScore;
 	private final int dureeMaxDesVisites = 50; //minutes
-	
+
 	private ITIN best;
 
 	public Solver(/*String emplacementArretId,*/ Graph graph){
-		
+
 		/*
 		System.out.println("Calcul du score max :");
 		Date t1 = new Date();
@@ -29,20 +29,20 @@ public class Solver {
 		this.maxScore = graph.getAllplaces().get(0).scoreMax();
 		Date t2 = new Date();
 		System.out.println("Scoremax = " + maxScore);
-		System.out.println("Durée : " + (t2.getTime() - t1.getTime()) + "ms");
-		/*System.out.println("Génération aléatoire des scores et durées de visite :");
+		System.out.println("DurÃ©e : " + (t2.getTime() - t1.getTime()) + "ms");
+		/*System.out.println("GÃ©nÃ©ration alÃ©atoire des scores et durÃ©es de visite :");
 		t1 = new Date();
 		generateScoresAndTimes(graph);
 		t2 = new Date();
-		System.out.println("Durée : " + (t2.getTime() - t1.getTime()) + "ms");*/
+		System.out.println("DurÃ©e : " + (t2.getTime() - t1.getTime()) + "ms");*/
 
 		//boolean cheminsDejaCalcules = chargerPlusCourtsChemins(graph);
 
-		/*System.out.println("Chargement des coordonnées...");
+		/*System.out.println("Chargement des coordonnÃ©es...");
 		t1 = new Date();
 		loadCoords(graph);
 		t2 = new Date();
-		System.out.println("Durée : " + (t2.getTime() - t1.getTime()) + "ms");
+		System.out.println("DurÃ©e : " + (t2.getTime() - t1.getTime()) + "ms");
 		*/
 		/*
 		if(!cheminsDejaCalcules){
@@ -52,16 +52,16 @@ public class Solver {
 			t1 = new Date();
 			sauvegardeReussie = computeShortestPaths(graph);
 			t2 = new Date();
-			System.out.println("Durée : " + (t2.getTime() - t1.getTime()) + "ms");
+			System.out.println("DurÃ©e : " + (t2.getTime() - t1.getTime()) + "ms");
 			if(sauvegardeReussie){
-				System.out.println("Les plus courts chemins ont été sauvegardés avec succès.");
+				System.out.println("Les plus courts chemins ont Ã©tÃ© sauvegardÃ©s avec succÃ¨s.");
 			}else{
-				System.out.println("La sauvegarde des plus courts chemin a échoué.");
+				System.out.println("La sauvegarde des plus courts chemin a Ã©chouÃ©.");
 			}
 		}
 		
 		else{
-			System.out.println("Plus courts chemins précalculés chargés.");
+			System.out.println("Plus courts chemins prÃ©calculÃ©s chargÃ©s.");
 		}*/
 		//showNetwork();
 		//DialogMap dm = new DialogMap("Saisie des Places", null, graph, 0, maxScore);
@@ -73,26 +73,26 @@ public class Solver {
 			//Place destination = dm.getResult()[1];
 			//if(source!=null && destination!=null){
 				System.out.println("Vous souhaitez aller de " + source + " vers " + destination);
-				System.out.println("Vitesse de déplacement : 4km/h");
+				System.out.println("Vitesse de dÃ©placement : 4km/h");
 				System.out.println("Temps dispo : " + graph.getUser().getTime() +"minutes");
 				System.out.println("Calcul de l'itineraire maximisant le score");
 				Date t1 = new Date();
 				ITIN best = computeBestPath(graph);
 				Date t2 = new Date();
-				System.out.println("Durée : " + (t2.getTime() - t1.getTime()) + "ms");
+				System.out.println("DurÃ©e : " + (t2.getTime() - t1.getTime()) + "ms");
 				if(best!=null){
 					/*DialogMap displayBestResult = new DialogMap("Votre itineraire", best, graph, 4000, maxScore);
 					displayBestResult.setVisible(true);
 					displayBestResult.dispose();*/
 					this.best = best;
-					System.out.println("Itinéraire ok");
+					System.out.println("ItinÃ©raire ok");
 				}
 				else
 				{
 					System.out.println("Aucun itineraire possible entre ces deux Places dans le temps imparti");}
 
 			//}
-			//else{System.out.println("Vous n'avez sélectionné aucune Place");
+			//else{System.out.println("Vous n'avez sÃ©lectionnÃ© aucune Place");
 		}
 
 
@@ -186,10 +186,10 @@ public class Solver {
 					boolean precNotFound = true;
 					int i=0;
 					Place prec;
-					// On parcours les points visites tries par distance relative à pp
-					// jusqu'à en trouver un qui soit dans les sommets atteignables de pp
-					// (il y en a forcément un, sinon pp serait à une distance infinie et getplusproche retournerai null)
-					// c'est ce point qui sera le prédecesseur de pp
+					// On parcours les points visites tries par distance relative Ã  pp
+					// jusqu'Ã  en trouver un qui soit dans les sommets atteignables de pp
+					// (il y en a forcÃ©ment un, sinon pp serait Ã  une distance infinie et getplusproche retournerai null)
+					// c'est ce point qui sera le prÃ©decesseur de pp
 					while(precNotFound&&i<visites.size()){
 						prec = visites.get(i);
 						if(prec!=null&&prec.getSommetsAtteignables(graph).contains(pp)){
@@ -253,7 +253,7 @@ public class Solver {
 	 * 
 	 * @param dep
 	 * @param arr
-	 * @param vitesse En unité de coordonnée par heure (1 unité = 1 mètre ==> equivalent a du Mètre Par Heure, exemple pour 4km/h mettre 4000)
+	 * @param vitesse En unitÃ© de coordonnÃ©e par heure (1 unitÃ© = 1 mÃ¨tre ==> equivalent a du MÃ¨tre Par Heure, exemple pour 4km/h mettre 4000)
 	 * @param minutesDispo
 	 * @return
 	 */
@@ -268,10 +268,10 @@ public class Solver {
 		Date t1 = new Date();
 		// Simplification du graphe
 		Graph g = graph.simplify();
-				
+
 				//simplifyGraph(depart, vitesse, minutesDispo, graph);
 		Date t2 = new Date();
-		System.out.println("Durée : " + (t2.getTime() - t1.getTime()) + "ms");
+		System.out.println("DurÃ©e : " + (t2.getTime() - t1.getTime()) + "ms");
 		//	----------------------------
 
 
@@ -281,14 +281,14 @@ public class Solver {
 		if(!g.getAllplaces().contains(arrivee)||vitesse<vitesseNecessaire){
 			// Si l'arrivee n'est pas dans le rayon atteignable
 			// OU
-			// Si le plus court chemin entre depart et arrivee a une durée plus longue que le tps dispo
-			// A améliorer : Ce calcul ne prend pas en compte les temps de visite du départ et de l'arrivee
+			// Si le plus court chemin entre depart et arrivee a une durÃ©e plus longue que le tps dispo
+			// A amÃ©liorer : Ce calcul ne prend pas en compte les temps de visite du dÃ©part et de l'arrivee
 
-			System.out.println("L'arrivee demandée n'est pas atteignable dans le temps imparti. Vitesse nécessaire = " + vitesseNecessaire + " > " + vitesse);
+			System.out.println("L'arrivee demandÃ©e n'est pas atteignable dans le temps imparti. Vitesse nÃ©cessaire = " + vitesseNecessaire + " > " + vitesse);
 		}else{
 			System.out.println("Recherche du meilleur chemin...");
 			bestPath = new ITIN(depart, arrivee);
-			//Classement des Places par score décroissant, classement des Places par duree de visite croissante.
+			//Classement des Places par score dÃ©croissant, classement des Places par duree de visite croissante.
 			ArrayList<Place> classementParScore = new ArrayList<Place>(g.getAllplaces());
 			ArrayList<Place> classementParDuree = new ArrayList<Place>(g.getAllplaces());
 			ComparateurPOI comparateurScore = new ComparateurPOI(POIproperties.SCORE, false);
@@ -298,24 +298,24 @@ public class Solver {
 
 			// Tant qu'il reste des points qui sont potentiellement visitables
 			while(classementParScore.size() > 0){
-				// 6) Sélectionner le point ayant le meilleur score
+				// 6) SÃ©lectionner le point ayant le meilleur score
 				Place etapePotentielle = classementParScore.get(0);
 
-				// 7) Vérifier que la durée minimale de la visite de ce point est inférieure au temps restant
+				// 7) VÃ©rifier que la durÃ©e minimale de la visite de ce point est infÃ©rieure au temps restant
 				if(etapePotentielle.getTav()+bestPath.getDureeTot(vitesse)>minutesDispo){
 
-					//8) Calcul du temps minimal que prendrait un trajet ne visitant que ces points, en utilisant la base des distances précalculées.
+					//8) Calcul du temps minimal que prendrait un trajet ne visitant que ces points, en utilisant la base des distances prÃ©calculÃ©es.
 					ITIN newPath = null;
 					// s'il est possible de passer par cette etape potentielle et que le temps que cela prendrait est inferieur au temps dispo
 					if(bestPath.tryToGoBy(etapePotentielle, newPath)&&newPath.getDureeTot(vitesse)<=minutesDispo){
 						bestPath = newPath;					
-					}// Dans tous les cas on a vérifié cette option donc on la supprime
+					}// Dans tous les cas on a vÃ©rifiÃ© cette option donc on la supprime
 					classementParDuree.remove(etapePotentielle);
 					classementParScore.remove(etapePotentielle);
 
 				}else{
-					/*9) Si la durée est OK, on retourne à 6) en gardant ce point et en sélectionnant le point suivant dans l’ordre des meilleurs scores.
-					Sinon, on note ce point comme étant invisitable et on retourne à 6)*/
+					/*9) Si la durÃ©e est OK, on retourne Ã  6) en gardant ce point et en sÃ©lectionnant le point suivant dans lÂ’ordre des meilleurs scores.
+					Sinon, on note ce point comme Ã©tant invisitable et on retourne Ã  6)*/
 
 					// sinon, tout les points de temps de visite superieure seront invisitables aussi
 					boolean indexToDeleteFound = false;
@@ -337,14 +337,14 @@ public class Solver {
 			}
 		}
 		//Date t4 = new Date();
-        //System.out.println("Durée : " + (t4.getTime() - t3.getTime()) + "ms");
+        //System.out.println("DurÃ©e : " + (t4.getTime() - t3.getTime()) + "ms");
 		return bestPath;
 	}
 
 	/**
 	 * 
 	 * @param depart
-	 * @param vitesse En unité de coordonnée par heure (1 unité = 1 mètre ==> equivalent a du Mètre Par Heure, exemple pour 4km/h mettre 4000)
+	 * @param vitesse En unitÃ© de coordonnÃ©e par heure (1 unitÃ© = 1 mÃ¨tre ==> equivalent a du MÃ¨tre Par Heure, exemple pour 4km/h mettre 4000)
 	 * @param full
 	 * @return
 	 */
@@ -509,7 +509,7 @@ public class Solver {
 			line = lines.get(i);
 			if(line.startsWith(Balises.FROM_Begin)){
 				int fromID = Integer.parseInt(line.substring(Balises.FROM_Begin.length(),line.length()-1));
-				
+
 				///////////////////////////////////
 				from = new Place(graph,fromID);
 				fromIndex = graph.getAllplaces().indexOf(from);
@@ -536,7 +536,7 @@ public class Solver {
 				if(byIndex>-1){
 					chem.addEtape(by);
 				}else{
-					// Le fichier est corrompu (peut etre que le graphe a changé) 
+					// Le fichier est corrompu (peut etre que le graphe a changÃ©) 
 					//il faut recalculer les itineraire
 					success = false; 
 				}
@@ -560,5 +560,3 @@ public class Solver {
 	}
 
 }
-
-
