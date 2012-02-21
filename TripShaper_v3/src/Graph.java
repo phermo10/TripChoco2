@@ -313,6 +313,12 @@ public class Graph implements GraphInterface,Serializable {
 		System.out.println("after deserialization:" + g);
 
 		return g;*/
+		//TO DO : Prendre dans savings\Users\ userid.txt les données sur le User
+				//TO DO : Générer un Graphique à partir du fichier savings\graphiqueid\graphiqueid.txt
+				//TO DO : Ajouter les données de savings\graphiqueid\Useruserid.txt
+				
+		
+		
 		Graph g = new Graph();
 		String filename = "savings" + File.separator +"Graph" + userid +".txt";
 		Scanner reader = new Scanner(new File (filename));

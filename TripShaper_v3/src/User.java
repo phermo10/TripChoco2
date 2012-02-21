@@ -1,4 +1,11 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 
 public class User implements UserInterface {
@@ -118,5 +125,64 @@ public class User implements UserInterface {
 		
 		
 	}
+	
+	public void save() throws IOException{
+		PrintWriter writer =  new PrintWriter(new BufferedWriter
+				(new FileWriter("savings" + File.separator +"Users" + File.separator + this.getId() +".txt")));
+		
+		writer.println(this.getId());
+		writer.println(this.getTime());
+		writer.println(this.getDep().getId());
+		writer.println(this.getArr().getId());
+	}
+	
+	public static User restore (int userid, Graph graph) throws FileNotFoundException{
+		String filename = "savings" + File.separator +"Users" + File.separator + userid +".txt";
+		Scanner reader = new Scanner(new File (filename));
+		int id = Integer.parseInt(reader.nextLine());
+		int time = Integer.parseInt(reader.nextLine());
+		int depID = Integer.parseInt(reader.nextLine());
+		int arrID = Integer.parseInt(reader.nextLine());
+		int okwith2 = 0;
+		int i = 0;
+		int indexOfdep=0;
+		int indexOfarr=0;
+		while (i<graph.getAllplaces().size() && okwith2<2){
+			if (graph.getAllplaces().get(i).getId() == depID){
+				indexOfdep = i;
+				okwith2++;
+			}
+			if(graph.getAllplaces().get(i).getId() == arrID){
+				indexOfarr = i;
+				okwith2++;
+			}
+			i++;
+			
+		}
+		
+		return new User(id,time,graph.getAllplaces().get(indexOfdep),graph.getAllplaces().get(indexOfarr));
+		/*Now we have to create 2 places from their id
+		//int cityID = city.getId();
+		int cityID = 0;
+		String file2name = "savings" + File.separator + cityID + File.separator + cityID + ".txt";
+		Scanner reader2 = new Scanner (new File (filename));
+		//<Places>
+		String toRead = reader2.nextLine();
+		toRead=reader2.nextLine();
+		int line = Integer.parseInt(toRead);
+		ArrayList<Place> fromto = new ArrayList<Place>();
+		while (!toRead.equals("</Places>") && fromto.size() !=2){
+			if (line == depID){
+				toRead=reader2.nextLine();
+				
+			}
+			
+		}*/
+		
+		
+		
+	}
+	
+	
 
 }
