@@ -54,7 +54,7 @@ public class Display1 {
 			}
 			System.out.println("Voulez-vous en utiliser un plutot qu'en generer un nouveau ? o(oui)/n(non)");
 			String input = lireString();
-			if(input.startsWith("y")){
+			if(input.startsWith("o")){
 				newGraph = false;
 				System.out.println("Veuillez entrer l'ID du user");
 				input = lireString();
