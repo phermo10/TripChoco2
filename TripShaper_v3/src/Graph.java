@@ -270,7 +270,8 @@ public class Graph implements GraphInterface,Serializable {
 			writer.println(p.getP1().getId());
 			writer.println(p.getP2().getId());
 			writer.println(p.getTime());
-			writer.println(p.getScore());			
+			writer.println(p.getScore());
+			
 		}
 		writer.println("</Paths>");
 		System.out.println("Writing Tags ID");
@@ -278,7 +279,8 @@ public class Graph implements GraphInterface,Serializable {
 		for (Tag t : this.getAlltags()){
 			writer.println(t.getId());
 		}
-		writer.println("</Tags>");		
+		writer.println("</Tags>");
+		
 		writer.close();
 	}
 
@@ -366,6 +368,7 @@ public class Graph implements GraphInterface,Serializable {
 			
 			Path p = new Path (g,id,p1,p2,pathtime,pathscore);
 			toRead = reader.nextLine();
+			
 		}
 		while(!toRead.equals("</Paths>"));
 		return g;

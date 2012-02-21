@@ -89,8 +89,7 @@ public class Solver {
 				}
 				else
 				{
-					System.out.println("Aucun itineraire possible entre ces deux Places dans le temps imparti");
-				}
+					System.out.println("Aucun itineraire possible entre ces deux Places dans le temps imparti");}
 
 			//}
 			//else{System.out.println("Vous n'avez sélectionné aucune Place");
