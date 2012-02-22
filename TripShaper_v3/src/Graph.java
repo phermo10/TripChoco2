@@ -463,26 +463,29 @@ public class Graph implements GraphInterface,Serializable {
 		toRead = reader.nextLine();
 
 		toRead = reader.nextLine();
-		do {
+		while(!toRead.equals("</Paths>")) {
 			int id = Integer.parseInt(toRead);
+			
 			toRead=reader.nextLine();
 			Place p1 = g.getPlacesID().get(Integer.parseInt(toRead));
 			toRead=reader.nextLine();
 			Place p2 = g.getPlacesID().get(Integer.parseInt(toRead));
-			toRead=reader.nextLine();
+			
 			double dist = p1.getPosition().distance(p2.getPosition());
 			int pathtime = (int) (dist/(g.getUser().getSpeed()));
 			toRead=reader.nextLine();
 			int pathscore = Integer.parseInt(toRead);
 			
+		  //  System.out.println(g.getPathsID().keySet());
 			Path p = g.getPathsID().get(id);
 			p.setDist(dist);
 			p.setTime(pathtime);
 			p.setScore(pathscore);
-			toRead = reader.nextLine();
+			
+			toRead=reader.nextLine();
 
 		}
-		while(!toRead.equals("</Paths>"));
+		reader.close();
 		return g;
 
 	}

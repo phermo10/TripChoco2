@@ -31,6 +31,7 @@ public class Graphique {
 	HashMap<Point[],Integer> edgesIDhashmap ;
 	
 	public Graphique(String graphID){
+		this.graphID = graphID;
 		this.myPoints = new ArrayList<Point>();
 		this.delaunay = new Delaunay();
 		pointsIDhashmap = new HashMap<Point,Integer>();
