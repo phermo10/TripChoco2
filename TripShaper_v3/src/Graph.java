@@ -34,10 +34,16 @@ public class Graph implements GraphInterface,Serializable {
 	//public final static int zone_time = 2;
 
 	private ArrayList<Place> allplaces;
+	
+	private HashMap<Integer,Place> placesID;
 
 	private ArrayList<Path> allpaths;
-
+	
+	private HashMap<Integer,Path> pathsID;
+	
 	private ArrayList<Tag> alltags;
+	
+	private HashMap<Integer,Tag> tagsID;
 
 	private User user;
 
@@ -58,14 +64,59 @@ public class Graph implements GraphInterface,Serializable {
 		this.allpaths = allpaths;
 		this.alltags= alltags;
 		this.setUser(user);
+		this.pathsID= new HashMap<Integer,Path>();
+		this.placesID = new HashMap<Integer,Place>();
+		this.tagsID = new HashMap<Integer,Tag>();
+		
+		for (Place p : this.allplaces){
+			this.placesID.put(p.getId(), p);
+		}
+		
+		for (Path p : this.allpaths){
+			this.pathsID.put(p.getId(), p);
+		}
+		
+		for (Tag t : this.alltags){
+			this.tagsID.put(t.getId(),t);
+		}
+		
 	}
+	
+	//---------Constructs a graph from a city (graphique) for a specific user-------
+	//---------Generates all the scores and times----------------
+	public Graph(Graphique city, User user){
+		this(user);
+		this.setDispersion(city);
+		//Creation of the places and paths 
+				for (Point p : city.getMesPoints()){
+					int pID = city.getPointsIDhashmap().get(p);
+					Place newplace = new Place (this,pID,p);
+					newplace.setBasicscore(newplace.basicScore());
+				}
+				
+				for (Point[] edge : city.getEdges()){
+					int edgeID = city.getEdgesIDhashmap().get(edge);
+					int end1ID = city.getPointsIDhashmap().get(edge[0]);
+					int end2ID = city.getPointsIDhashmap().get(edge[1]);
+					Place end1 = this.getPlacesID().get(end1ID);
+					Place end2 = this.getPlacesID().get(end2ID);
+					Path newpath = new Path (this,edgeID,end1,end2);
+					newpath.setScore(newpath.rankToScore());
+				}
+		
+		
+	}
+	
+	
 
 	//--------- Graph Generator------------
 
 	public Graph(int nbPoints){
 		this();
 		try {
-			this.setDispersion(new Graphique (nbPoints,2));
+			Graphique graphique = new Graphique (nbPoints,2);
+			graphique.saveGraph();
+			this.setDispersion(graphique);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -84,6 +135,7 @@ public class Graph implements GraphInterface,Serializable {
 			//A sa création, une place est déjà ajoutée à son graph
 			if (i==nbPoints/2 || i == nbPoints/3 || i == nbPoints/6 || i==  nbPoints/10 ){
 				Place p = new Place (this, mesPoints.get(i),10 + (int) (110*(1-Math.random())), (int)(100*(1-0.5*Math.random())));
+				
 				link.put(mesPoints.get(i),p);
 			}
 			else {
@@ -99,10 +151,14 @@ public class Graph implements GraphInterface,Serializable {
 			Place p1 = link.get(point1);
 			Place p2 = link.get(point2);
 			if ((zone1Edges.contains(point1) && zone1Edges.contains(point2)) || (zone2Edges.contains(point1) && zone2Edges.contains(point2)) ){
+				System.out.println("blablaBLA" + this.getDispersion().getEdgesIDhashmap());
 				Path path = new Path(this,p1,p2,0);
-			}
+				path.setId(this.getDispersion().getEdgesIDhashmap().get(mesArcs.get(i)));
+				}
 			else {
 				Path path = new Path(this,p1,p2,(int)(30*Math.random()));
+				path.setId(this.getDispersion().getEdgesIDhashmap().get(mesArcs.get(i)));
+					
 			}
 		}
 
@@ -171,6 +227,41 @@ public class Graph implements GraphInterface,Serializable {
 		this.dispersion = graphic;
 	}
 
+	public HashMap<Integer,Place> getPlacesID() {
+		return placesID;
+	}
+
+	public void setPlacesID(HashMap<Integer,Place> placesID) {
+		this.placesID = placesID;
+	}
+	
+	public void putPlaceID (int placeid, Place place){
+		this.placesID.put(placeid,place);
+	}
+
+	public HashMap<Integer,Path> getPathsID() {
+		return pathsID;
+	}
+
+	public void setPathsID(HashMap<Integer,Path> pathsID) {
+		this.pathsID = pathsID;
+	}
+	
+	public void putPathID (int pathID, Path path){
+		this.pathsID.put(pathID, path);
+	}
+
+	public HashMap<Integer,Tag> getTagsID() {
+		return tagsID;
+	}
+
+	public void setTagsID(HashMap<Integer,Tag> tagsID) {
+		this.tagsID = tagsID;
+	}
+
+	public void putTagID (int tagid, Tag tag){
+		this.tagsID.put(tagid,tag);
+	}
 	public boolean availableID(int id){
 		int i =0;
 		while(i<this.getAllplaces().size() && this.getAllplaces().get(i).getId() !=id){
@@ -246,19 +337,20 @@ public class Graph implements GraphInterface,Serializable {
 
 
 		PrintWriter writer =  new PrintWriter(new BufferedWriter
-				(new FileWriter("savings" + File.separator +"Graph" + this.getUser().getId() +".txt")));
+				(new FileWriter("savings" + File.separator + this.getDispersion().getID() + File.separator + "User" + this.getUser().getId() +".txt")));
 		writer.println("<User>");
 		writer.println(this.getUser().getId());
+		writer.println(this.getUser().getSpeed());
 		writer.println(this.getUser().getTime());
 		writer.println(this.getUser().getDep().getId());
 		writer.println(this.getUser().getArr().getId());
 		writer.println("</User>");
-		System.out.println("Writing places ID");
+		System.out.println("Writing places ID...");
 		writer.println("<Places>");
 		for (Place p : this.getAllplaces()){
 			writer.println(p.getId());
-			writer.println((int)p.getPosition().getX());
-			writer.println((int)p.getPosition().getY());
+			//writer.println((int)p.getPosition().getX());
+			//writer.println((int)p.getPosition().getY());
 			writer.println(p.getTav());
 			writer.println(p.getBasicscore());
 		}
@@ -269,7 +361,7 @@ public class Graph implements GraphInterface,Serializable {
 			writer.println(p.getId());
 			writer.println(p.getP1().getId());
 			writer.println(p.getP2().getId());
-			writer.println(p.getTime());
+			//writer.println(p.getTime());
 			writer.println(p.getScore());
 
 		}
@@ -305,7 +397,7 @@ public class Graph implements GraphInterface,Serializable {
 		frame.setVisible(true);
 	}
 
-	public static Graph restore(int userid) throws FileNotFoundException {
+	public static Graph restore(int userid, String graphid) throws FileNotFoundException {
 		/*XMLDecoder decoder = new XMLDecoder(new FileInputStream("Graph" + userid + ".xml"));
 		Graph g = (Graph) decoder.readObject();
 		decoder.close();
@@ -314,43 +406,59 @@ public class Graph implements GraphInterface,Serializable {
 
 		return g;*/
 		Graph g = new Graph();
-		String filename = "savings" + File.separator +"Graph" + userid +".txt";
+		Graphique city = new Graphique(graphid);
+		g.setDispersion(city);
+		//Creation of the places and paths 
+		for (Point p : city.getMesPoints()){
+			int pID = city.getPointsIDhashmap().get(p);
+			Place newplace = new Place (g,pID,p);
+		}
+		
+		for (Point[] edge : city.getEdges()){
+			int edgeID = city.getEdgesIDhashmap().get(edge);
+			int end1ID = city.getPointsIDhashmap().get(edge[0]);
+			int end2ID = city.getPointsIDhashmap().get(edge[1]);
+			Place end1 = g.getPlacesID().get(end1ID);
+			Place end2 = g.getPlacesID().get(end2ID);
+			Path newpath = new Path (g,edgeID,end1,end2);
+			
+		}
+		
+		//Now we have to put scores and times on both places and paths
+		String filename = "savings" + File.separator + graphid + File.separator +"User" + userid +".txt";
 		Scanner reader = new Scanner(new File (filename));
 		//<User>
 		String toRead = reader.nextLine();
 		System.out.println(toRead);
 		//userid (already known)
 		toRead = reader.nextLine();
+		int speed = Integer.parseInt(reader.nextLine());
 		int time = Integer.parseInt(reader.nextLine());
 		int depid = Integer.parseInt(reader.nextLine());
 		int arrid = Integer.parseInt(reader.nextLine());
 		//</User>
 		toRead = reader.nextLine();
+		
 		//<Places>
-		toRead = reader.nextLine();
+	    toRead = reader.nextLine();
 		//This hashmap matches places to their ids
-		HashMap<Integer,Place> placemap = new HashMap<Integer,Place>();
+		//HashMap<Integer,Place> placemap = new HashMap<Integer,Place>();
 		toRead = reader.nextLine();
 		do {
 			int id = Integer.parseInt(toRead);
 			toRead=reader.nextLine();
-			int x = Integer.parseInt(toRead);
-			toRead=reader.nextLine();
-			int y = Integer.parseInt(toRead);
-			Point position = new Point(x,y);
-			toRead=reader.nextLine();
 			int placetime = Integer.parseInt(toRead);
 			toRead=reader.nextLine();
 			int placescore = Integer.parseInt(toRead);
-			Place p = new Place(g,position,placetime,placescore);
-			p.setId(id);
-			placemap.put(id, p);
-
+			Place currentplace = g.getPlacesID().get(id);
+			currentplace.setTav(placetime);
+			currentplace.setBasicscore(placescore);
 			toRead=reader.nextLine();
 		}	
 		while (!toRead.equals("</Places>"));
-		User user = new User (userid,time,placemap.get(depid),placemap.get(arrid));
-		g.setUser(user);
+		User gUser = new User(userid,speed,time,g.getPlacesID().get(depid),g.getPlacesID().get(arrid));
+		g.setUser(gUser);
+		
 		//<Paths>
 		toRead = reader.nextLine();
 
@@ -358,15 +466,19 @@ public class Graph implements GraphInterface,Serializable {
 		do {
 			int id = Integer.parseInt(toRead);
 			toRead=reader.nextLine();
-			Place p1 = placemap.get(Integer.parseInt(toRead));
+			Place p1 = g.getPlacesID().get(Integer.parseInt(toRead));
 			toRead=reader.nextLine();
-			Place p2 = placemap.get(Integer.parseInt(toRead));
+			Place p2 = g.getPlacesID().get(Integer.parseInt(toRead));
 			toRead=reader.nextLine();
-			int pathtime = Integer.parseInt(toRead);
+			double dist = p1.getPosition().distance(p2.getPosition());
+			int pathtime = (int) (dist/(g.getUser().getSpeed()));
 			toRead=reader.nextLine();
 			int pathscore = Integer.parseInt(toRead);
-
-			Path p = new Path (g,id,p1,p2,pathtime,pathscore);
+			
+			Path p = g.getPathsID().get(id);
+			p.setDist(dist);
+			p.setTime(pathtime);
+			p.setScore(pathscore);
 			toRead = reader.nextLine();
 
 		}

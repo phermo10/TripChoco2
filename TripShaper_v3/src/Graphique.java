@@ -4,15 +4,17 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-
-import javax.print.attribute.standard.MediaSize.Engineering;
+import java.util.HashMap;
+import java.util.Scanner;
 
 
 public class Graphique {
+	String graphID;
 	ArrayList<Point> myPoints;
 	ArrayList<Point[]> delaunayEdges;
 	ArrayList<Point[]> edges;
@@ -22,9 +24,62 @@ public class Graphique {
 	Delaunay delaunay;
 	ArrayList<Point> centresZonesRegroupement;
 	boolean[][] edgesMatrix;
+	int nbPointsZone1;
+	int nbPointsZone2;
+
+	HashMap<Point,Integer> pointsIDhashmap ;
+	HashMap<Point[],Integer> edgesIDhashmap ;
+	
+	public Graphique(String graphID){
+		this.myPoints = new ArrayList<Point>();
+		this.delaunay = new Delaunay();
+		pointsIDhashmap = new HashMap<Point,Integer>();
+		edgesIDhashmap = new HashMap<Point[],Integer>();
+		this.edges=new ArrayList<Point[]>();
+		try {
+			String filename = "savings" + File.separator +graphID + File.separator +graphID +".txt";
+			Scanner reader = new Scanner(new File (filename));
+			String toRead = reader.nextLine();
+			toRead = reader.nextLine();
+			do {
+				System.out.println("toread : "+toRead);
+				int x = (int)(Integer.parseInt(toRead));
+				toRead=reader.nextLine();
+				int y = Integer.parseInt(toRead);
+				Point position = new Point(x,y);
+				myPoints.add(position);
+				delaunay.insertPoint(new Point(x,y));
+				toRead=reader.nextLine();
+				pointsIDhashmap.put(position,(int)Integer.parseInt(toRead));
+				toRead=reader.nextLine();
+			}	
+			while (!toRead.equals("</Places>"));
+			toRead = reader.nextLine();
+			toRead = reader.nextLine();
+			System.out.println("toRead : "+toRead);
+			do {
+				System.out.println("here");
+				Point[] myedge=new Point[2];
+				myedge[0]=myPoints.get(Integer.parseInt(toRead));
+				toRead = reader.nextLine();
+				myedge[1]=myPoints.get(Integer.parseInt(toRead));
+				toRead = reader.nextLine();
+				int idedge=Integer.parseInt(toRead);
+				edgesIDhashmap.put(myedge, idedge);
+				edges.add(myedge);
+				toRead = reader.nextLine();
+			}
+			while(!toRead.equals("</Edges>"));
+			System.out.println("end");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	public Graphique(int nbPoints, int nbPointsRegroupement) throws IOException {
 		super();
+		this.graphID="graph"+((int)(Math.random()*1000));
 		this.delaunay = new Delaunay();
 		this.myPoints = new ArrayList<Point>();
 		this.zonesRegroupement= new ArrayList<ArrayList<Point>>();
@@ -32,9 +87,59 @@ public class Graphique {
 		generatePoints();
 		generateEdges();
 		simplifyEdges();
+		generateID();
 		saveGraph();
 	}
+
+	public void generateID(){
+		pointsIDhashmap = new HashMap<Point,Integer>();
+		edgesIDhashmap = new HashMap<Point[],Integer>();
+		for (int i=0;i<myPoints.size();i++){
+			/*int newID= (int) (Graph.maxID*Math.random());
+				while (availableID(newID)==false){
+					newID= (int) (Graph.maxID*Math.random());
+				}*/
+			int newID=i;
+			pointsIDhashmap.put(myPoints.get(i), newID);
+		}
+		for (int i=0;i<edges.size();i++){
+			/*int newID= (int) (Graph.maxID*Math.random());
+			while (availableID(newID)==false){
+				newID= (int) (Graph.maxID*Math.random());
+			}*/
+			int newID=((int)Integer.parseInt("100"+i));
+			edgesIDhashmap.put(edges.get(i), newID);
+		}
+	}
+
+	/*public boolean availableID(int id){
+		int i =0;
+		System.out.println("myPoints.size() : "+myPoints.size());
+		System.out.println("pointsIDhashmap.get(myPoints.get(i)) : "+pointsIDhashmap.get(myPoints.get(i)));
+		while(i<myPoints.size() && pointsIDhashmap.get(myPoints.get(i)) !=id){
+			i++;
+		}
+		if (i<myPoints.size()){
+			return false;
+		}
+		else {
+			i=0;
+			while(i<edges.size() && edgesIDhashmap.get(edges.get(i)) !=id){
+				i++;
+			}
+			if (i<edges.size()){
+				return false;
+			}
+			else {
+				return true;
+			}
+		}
+	}*/
 	
+	public String getID(){
+		return this.graphID;
+	}
+
 	public void generatePoints(){
 		ArrayList<Point> zone1 = null;
 		ArrayList<Point> zone2 = null;
@@ -42,6 +147,17 @@ public class Graphique {
 		int yPointRegroupement1=0;
 		int xPointRegroupement2=0;
 		int yPointRegroupement2=0;
+		nbPointsZone1=0;
+		while(nbPointsZone1<3){
+			System.out.println("nbPointsZone1 : "+nbPointsZone1);
+			nbPointsZone1=(int) (Math.random()*10);
+		}
+		nbPointsZone2=0;
+		while(nbPointsZone2<3){
+			nbPointsZone2=(int) (Math.random()*10);
+		}		
+		System.out.println("nbPointsZone1 : "+nbPointsZone1);
+		System.out.println("nbPointsZone2 : "+nbPointsZone2);
 		zone1=new ArrayList<Point>();
 		zone2=new ArrayList<Point>();
 		for (int i=0;i<Display1.nbPoints;i++){
@@ -51,19 +167,19 @@ public class Graphique {
 			if (i==0){//first point zone1
 				whichCase=0;
 			}
-			if (i>0&&i<9){//points zone1
+			if (i>0&&i<nbPointsZone1-1){//points zone1
 				whichCase=1;
 			}
-			if (i==9){//last point zone1
+			if (i==nbPointsZone1-1){//last point zone1
 				whichCase=2;
 			}
-			if (i==10){//first point zone2
+			if (i==nbPointsZone1){//first point zone2
 				whichCase=3;
 			}
-			if (i>10&&i<19){//points zone2
+			if (i>nbPointsZone1&&i<nbPointsZone1+nbPointsZone2-1){//points zone2
 				whichCase=4;
 			}
-			if (i==19){//last point zone2
+			if (i==nbPointsZone1+nbPointsZone2-1){//last point zone2
 				whichCase=5;
 			}
 			switch(whichCase){
@@ -188,27 +304,31 @@ public class Graphique {
 			delaunay.insertPoint(new Point(x,y));
 		}
 	}
-	
+
 	public void saveGraph() throws IOException{
+		File dir = new File ("savings"+File.separator+graphID);
+		dir.mkdirs();
 		PrintWriter writer =  new PrintWriter(new BufferedWriter
-				(new FileWriter("savings" + File.separator +"graph.txt")));
-		writer.println("places");
-		for (Point i : myPoints){
-			writer.println(i.getX());
-			writer.println(i.getY());
+				(new FileWriter("savings" + File.separator +graphID+File.separator +graphID+".txt")));
+		writer.println("<Places>");
+		for (int i=0;i<myPoints.size();i++){
+			writer.println((int)myPoints.get(i).getX());
+			writer.println((int)myPoints.get(i).getY());
+			writer.println((int)pointsIDhashmap.get(myPoints.get(i)));
 		}
-		writer.println("end places");
-		writer.println("edges");
-		for (Point[] i : edges){
-			writer.println(i[0].getX());
-			writer.println(i[0].getY());
-			writer.println(i[1].getX());
-			writer.println(i[1].getY());
+		writer.println("</Places>");
+		writer.println("<Edges>");
+		for (int i=0;i<edges.size();i++){
+			writer.println((int)pointsIDhashmap.get(edges.get(i)[0]));
+			writer.println((int)pointsIDhashmap.get(edges.get(i)[1]));
+			writer.println((int)edgesIDhashmap.get(edges.get(i)));
 		}
-		writer.println("end edges");
+		writer.println("</Edges>");
 		writer.close();
 	}
 	
+	
+
 	public void generateEdges(){
 		ArrayList<Point[]> delaunayEdges = (ArrayList<Point[]>) delaunay.computeEdges();
 		this.delaunayEdges = delaunayEdges;
@@ -231,8 +351,8 @@ public class Graphique {
 		}
 		// looking for a path between the two zones
 		boolean pathBetweenZones=false;
-		for (int i=10;i<20;i++){ 
-			for (int j=0;j<10;j++){
+		for (int i=nbPointsZone1;i<nbPointsZone1+nbPointsZone2;i++){ 
+			for (int j=0;j<nbPointsZone1;j++){
 				if (edgesMatrix[i][j]==true){
 					pathBetweenZones=true;
 				}
@@ -240,27 +360,27 @@ public class Graphique {
 		}
 		//creating one path between the two zones
 		if (pathBetweenZones==true){ 
-			for (int i=10;i<20;i++){ 
-				for (int j=0;j<10;j++){
+			for (int i=nbPointsZone1;i<nbPointsZone1+nbPointsZone2;i++){ 
+				for (int j=0;j<nbPointsZone1;j++){
 					edgesMatrix[i][j]=false;
 					edgesMatrix[j][i]=false;
 				}
 			}
-			int i=(int) (10+Math.random()*9);
-			int j=(int) (Math.random()*9);
+			int i=(int) (nbPointsZone1+Math.random()*(nbPointsZone2-1));
+			int j=(int) (Math.random()*(nbPointsZone1-1));
 			edgesMatrix[i][j]=true;
 			edgesMatrix[j][i]=true;
 		}
 		//creating only one path between a point and zone 1
-		for (int i=20;i<Display1.nbPoints;i++){
+		for (int i=nbPointsZone1+nbPointsZone2;i<Display1.nbPoints;i++){
 			int indexPath=-1;
-			for (int j=0;j<10;j++){
+			for (int j=0;j<nbPointsZone1;j++){
 				if (edgesMatrix[i][j]==true){
 					indexPath=j;
 				}
 			}
 			if (indexPath!=-1){
-				for (int j=0;j<10;j++){
+				for (int j=0;j<nbPointsZone1;j++){
 					edgesMatrix[i][j]=false;
 					edgesMatrix[j][i]=false;
 				}
@@ -273,15 +393,15 @@ public class Graphique {
 			}
 		}
 		//creating only one path between a point and zone 2
-		for (int i=20;i<Display1.nbPoints;i++){
+		for (int i=nbPointsZone1+nbPointsZone2;i<Display1.nbPoints;i++){
 			int indexPath=-1;
-			for (int j=10;j<20;j++){
+			for (int j=nbPointsZone1;j<nbPointsZone1+nbPointsZone2;j++){
 				if (edgesMatrix[i][j]==true){
 					indexPath=j;
 				}
 			}
 			if (indexPath!=-1){
-				for (int j=10;j<20;j++){
+				for (int j=nbPointsZone1;j<nbPointsZone1+nbPointsZone2;j++){
 					edgesMatrix[i][j]=false;
 					edgesMatrix[j][i]=false;
 				}
@@ -307,7 +427,7 @@ public class Graphique {
 			}
 		}
 	}
-	
+
 	public void simplifyEdges(){
 		edges=tempEdges;
 		//erasing edges too closer to each other
@@ -407,7 +527,7 @@ public class Graphique {
 				}
 			}
 		}*/
-		
+
 	}
 
 
@@ -443,7 +563,21 @@ public class Graphique {
 		return centresZonesRegroupement;
 	}
 
+	public HashMap<Point, Integer> getPointsIDhashmap() {
+		return pointsIDhashmap;
+	}
 
+	public void setPointsIDhashmap(HashMap<Point, Integer> pointsIDhashmap) {
+		this.pointsIDhashmap = pointsIDhashmap;
+	}
+
+	public HashMap<Point[], Integer> getEdgesIDhashmap() {
+		return edgesIDhashmap;
+	}
+
+	public void setEdgesIDhashmap(HashMap<Point[], Integer> edgesIDhashmap) {
+		this.edgesIDhashmap = edgesIDhashmap;
+	}
 
 
 }

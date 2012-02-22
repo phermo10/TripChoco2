@@ -44,8 +44,8 @@ public class MonCompo extends Component{
 			}
 			ArrayList<Point[]> edges = this.graph.getEdges();
 			System.out.println("this.graph.getEdges().size() : "+this.graph.getEdges().size());
-			System.out.println("this.graph.getDelaunayEdges().size() : "+this.graph.getDelaunayEdges().size());
-			System.out.println("MonCompo : zonesRegroupement.size() : "+this.graph.getZonesRegroupement().size());
+			//System.out.println("this.graph.getDelaunayEdges().size() : "+this.graph.getDelaunayEdges().size());
+			//System.out.println("MonCompo : zonesRegroupement.size() : "+this.graph.getZonesRegroupement().size());
 			for (Point[] arc : edges){
 				Point p1 = arc[0];
 				Point p2 = arc[1];
@@ -56,12 +56,12 @@ public class MonCompo extends Component{
 				int y=(int) this.graph.getCentreZonesRegroupement().get(i).getY();
 				g.drawOval(x-25,y-25,80,80);
 			}*/
-			int x1=(int) this.graph.getCentreZonesRegroupement().get(0).getX();
+			/*int x1=(int) this.graph.getCentreZonesRegroupement().get(0).getX();
 			int y1=(int) this.graph.getCentreZonesRegroupement().get(0).getY();
 			g.drawOval(x1-25,y1-25,80,80);
 			int x2=(int) this.graph.getCentreZonesRegroupement().get(1).getX();
 			int y2=(int) this.graph.getCentreZonesRegroupement().get(1).getY();
-			g.drawOval(x2-25,y2-25,110,110);
+			g.drawOval(x2-25,y2-25,110,110);*/
 		}
 
 	

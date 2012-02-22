@@ -1,3 +1,4 @@
+import java.awt.Point;
 import java.util.ArrayList;
 
 
@@ -28,6 +29,7 @@ public class Path implements PathInterface {
 		this.setTime((int) (this.getDist()/(this.getGraph().getUser().getSpeed())));
 		
 		this.graph.addPath(this);
+		this.graph.putPathID(this.id, this);
 		
 	}
 	
@@ -47,7 +49,9 @@ public class Path implements PathInterface {
 		this.graph.addPath(this);
 	}*/
 	
-	
+	public Path (Graph graph, int id, Place p1, Place p2){
+		this(graph,id,p1,p2,Integer.MAX_VALUE,Integer.MAX_VALUE);
+	}
 	public Path(Graph graph, int id, Place p1, Place p2, int time, int score){
 		this.graph = graph;
 		this.p1=p1;
@@ -57,6 +61,7 @@ public class Path implements PathInterface {
 		this.id=id;
 		
 		this.graph.addPath(this);
+		this.graph.putPathID(this.id,this);
 	}
 	
 	public Path(Graph graph, Place p1, Place p2, int score){
@@ -65,12 +70,12 @@ public class Path implements PathInterface {
 		this.p2 = p2;
 		this.score=score;
 		this.dist = p1.getPosition().distance(p2.getPosition());
-		do {
-			this.id = (int) (Graph.maxID*Math.random());
-		}
-		while (!this.getGraph().availableID(this.id));
+		Point[] edge = {p1.getPosition(),p2.getPosition()};
+		System.out.println(edge);
+	    this.setId(this.getGraph().getDispersion().getEdgesIDhashmap().get(edge));
 		
 		this.graph.addPath(this);
+		this.graph.putPathID(this.id,this);
 	}
 	
 	
@@ -132,17 +137,22 @@ public class Path implements PathInterface {
 
 	public int rankToScore () {
 		
-		int score = 0;
+		/*int score = 0;
 		for (Tag t : this.getGraph().getAlltags()){
 			score += t.getPathranking().size()-t.getPathranking().indexOf(t);
 			
-		}
+		*/
 		
+		int score = 0;
+		for (Tag t : this.getGraph().getAlltags()){
+			score += this.getGraph().getUser().getScore(t)*(t.getPathranking().size() - t.getPlaceranking().indexOf(this));
+		}
 		
 		return score;
 		
-		
 	}
+
+		
 	
 	public String toString(){
 		return id + " : (from " + p1.getId() + " to " + p2.getId() + ") ; score : " + this.getScore() + " ; time : " + this.getTime();

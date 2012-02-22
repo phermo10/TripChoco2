@@ -27,6 +27,7 @@ public class Place implements PlaceInterface {
 
 	private HashMap<Place,ITIN> itineraires;
 	
+	
 	/*
 	 * Si on utilise le regroupement :
 	 * 
@@ -60,27 +61,30 @@ public class Place implements PlaceInterface {
 		this.minscore=this.minimumScore();
 		
 		this.graph.addPlace(this);
+		this.graph.putPlaceID(this.id, this);
 		
 	}
 
 	//Constructors for testing
 	public Place (Graph graph, Point position, int time, int score){
 		this.graph = graph;
-		//Random id
-		do {
-			this.id = (int) (Graph.maxID*Math.random());
-		}
-		while (!this.getGraph().availableID(this.id));
+		this.setId(this.getGraph().getDispersion().getPointsIDhashmap().get(position));
 		this.position = position;
 		this.tav = time;
 		this.basicscore = score;
 		
 		this.graph.addPlace(this);
+		this.graph.putPlaceID(this.id, this);
 		
 	}
 	
-	public Place (Graph graph, Point position){
-		this(graph,position,Integer.MAX_VALUE,Integer.MAX_VALUE);
+	public Place (Graph graph, int id, Point position){
+		this.graph = graph;
+		this.id=id;
+		this.position = position;
+		
+		this.graph.addPlace(this);
+		this.graph.putPlaceID(this.id, this);
 	}
 	
 	public Place (Graph graph, int id){
@@ -229,5 +233,29 @@ public class Place implements PlaceInterface {
 		
 	return att;
 	}
+	
+	public int rankToScore(){
+		
+		int score = 0;
+		for (Tag t : this.getGraph().getAlltags()){
+			score += t.getPlaceranking().size()-t.getPlaceranking().indexOf(t);
+			
+		}
+		
+		
+		return score;
+	}
+	
+	public int getTime(NiveauTemps niv){
+		if (niv == NiveauTemps.PAS_DE_VISITE){
+			return 0;
+		}
+		else {
+			return this.getTav();
+			}
+	
+	}
+	
+
 	
 }
