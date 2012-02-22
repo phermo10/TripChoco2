@@ -170,7 +170,7 @@ public class Solver {
 			for(Place s : graph.getAllplaces()){
 				if(s!=depart){
 					distances.put(s,Double.POSITIVE_INFINITY);
-					ITIN it = new ITIN(depart, s);
+					ITIN it = new ITIN(depart, NiveauTemps.TEMPS_MOY, s, NiveauTemps.TEMPS_MOY);
 					it.makeImpossible();
 					plusCourtsChemins.put(s, it);
 				}
@@ -197,9 +197,9 @@ public class Solver {
 							ITIN shortestToPrec = plusCourtsChemins.get(prec);
 							ITIN shortestToPP;
 							if(shortestToPrec!=null)
-								shortestToPP = shortestToPrec.prolonger(pp);
+								shortestToPP = shortestToPrec.prolonger(pp,NiveauTemps.PAS_DE_VISITE);
 							else
-								shortestToPP = new ITIN(depart, pp);
+								shortestToPP = new ITIN(depart,NiveauTemps.TEMPS_MOY, pp,NiveauTemps.TEMPS_MOY);
 							plusCourtsChemins.put(pp, shortestToPP);
 						}
 						i++;
@@ -287,7 +287,7 @@ public class Solver {
 			System.out.println("L'arrivee demandée n'est pas atteignable dans le temps imparti. Vitesse nécessaire = " + vitesseNecessaire + " > " + vitesse);
 		}else{
 			System.out.println("Recherche du meilleur chemin...");
-			bestPath = new ITIN(depart, arrivee);
+			bestPath = new ITIN(depart,NiveauTemps.TEMPS_MOY, arrivee,NiveauTemps.TEMPS_MOY);
 			//Classement des Places par score décroissant, classement des Places par duree de visite croissante.
 			ArrayList<Place> classementParScore = new ArrayList<Place>(g.getAllplaces());
 			ArrayList<Place> classementParDuree = new ArrayList<Place>(g.getAllplaces());
@@ -307,9 +307,9 @@ public class Solver {
 					//8) Calcul du temps minimal que prendrait un trajet ne visitant que ces points, en utilisant la base des distances précalculées.
 					ITIN newPath = null;
 					// s'il est possible de passer par cette etape potentielle et que le temps que cela prendrait est inferieur au temps dispo
-					if(bestPath.tryToGoBy(etapePotentielle, newPath)&&newPath.getDureeTot(vitesse)<=minutesDispo){
+					if(bestPath.tryToGoBy(etapePotentielle,NiveauTemps.TEMPS_MOY, newPath)){ if (newPath.getDureeTot(vitesse)<=minutesDispo){
 						bestPath = newPath;					
-					}// Dans tous les cas on a vérifié cette option donc on la supprime
+					}}// Dans tous les cas on a vérifié cette option donc on la supprime
 					classementParDuree.remove(etapePotentielle);
 					classementParScore.remove(etapePotentielle);
 
@@ -338,6 +338,7 @@ public class Solver {
 		}
 		//Date t4 = new Date();
         //System.out.println("Durée : " + (t4.getTime() - t3.getTime()) + "ms");
+		//bestPath.ordonnerEtapes();
 		return bestPath;
 	}
 
@@ -449,10 +450,10 @@ public class Solver {
 					if(!from.equals(to)){
 						output.println(Balises.TO_Begin+to.getId()+">");
 
-						ArrayList<Place> etapes = from.getPlusCourtsChemins().get(to).getEtapes();
-						for(Place etape : etapes){
+						ArrayList<Etape> etapes = from.getPlusCourtsChemins().get(to).getEtapes();
+						for(Etape etape : etapes){
 							if(!(etape.equals(to)||etape.equals(from)))
-								output.println(Balises.BY + etape.getId()+">");
+								output.println(Balises.BY + etape.getPlace().getId()+">");
 						}
 						output.println(Balises.TO_End);
 					}
@@ -476,7 +477,7 @@ public class Solver {
 	private boolean chargerPlusCourtsChemins(Graph graph){
 		//if(graph.isCoordsLoaded()) throw new IllegalArgumentException("Graph coords must not be loaded before calling this method.");
 		boolean success = true;
-
+		
 		ArrayList<String> lines = new ArrayList<String>();
 		try {
 			BufferedReader input =  new BufferedReader(new FileReader("plusCourtsChemins.txt"));
@@ -524,7 +525,7 @@ public class Solver {
 				to = new Place(graph,toID);
 				toIndex = graph.getAllplaces().indexOf(to);
 				if(toIndex>-1){
-					chem = new ITIN(from,to);
+					chem = new ITIN(from, NiveauTemps.TEMPS_MOY,to, NiveauTemps.TEMPS_MOY);
 				}else{
 					chem = null;
 				}
@@ -534,7 +535,7 @@ public class Solver {
 				by = new Place(graph,byID);
 				byIndex = graph.getAllplaces().indexOf(by);
 				if(byIndex>-1){
-					chem.addEtape(by);
+					chem.addEtape(by, NiveauTemps.PAS_DE_VISITE);
 				}else{
 					// Le fichier est corrompu (peut etre que le graphe a changé) 
 					//il faut recalculer les itineraire

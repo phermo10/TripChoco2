@@ -6,13 +6,13 @@ import java.awt.Point;
 import java.util.ArrayList;
 
 public class MonCompo extends Component{ 
-	
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	Graphique graph;
-	
+	private Graphique graph;
+	private ITIN itin;
 
 		public void paint(Graphics arg0) { 
 			/*Graphics2D g = (Graphics2D)arg0; 
@@ -36,7 +36,7 @@ public class MonCompo extends Component{
 			}*/
 			Graphics2D g = (Graphics2D)arg0; 
 			g.setColor(Color.blue);
-			
+
 			int n=0;
 			for (Point p : this.graph.getMesPoints()){
 				n++;
@@ -51,6 +51,17 @@ public class MonCompo extends Component{
 				Point p2 = arc[1];
 				g.drawLine((int)p1.getX(),(int) p1.getY(), (int)p2.getX(),(int) p2.getY());
 			}
+
+			if (itin!=null){
+				g.setColor(Color.red);
+				for (int i=0;i<itin.getEtapes().size()-1;i++){
+					g.fill3DRect((int)itin.getEtapes().get(i).getPosition().getX(),(int)itin.getEtapes().get(i).getPosition().getY(), 10, 10, true);
+					g.drawLine((int)itin.getEtapes().get(i).getPosition().getX(),(int)itin.getEtapes().get(i).getPosition().getY(), (int)itin.getEtapes().get(i+1).getPosition().getX(),(int)itin.getEtapes().get(i+1).getPosition().getY());
+				}
+				g.fill3DRect((int)itin.getEtapes().get(itin.getEtapes().size()-1).getPosition().getX(),(int)itin.getEtapes().get(itin.getEtapes().size()-1).getPosition().getY(), 10, 10, true);
+			}
+
+
 			/*for (int i=0;i<this.graph.getCentreZonesRegroupement().size();i++){
 				int x=(int) this.graph.getCentreZonesRegroupement().get(i).getX();
 				int y=(int) this.graph.getCentreZonesRegroupement().get(i).getY();
@@ -64,7 +75,7 @@ public class MonCompo extends Component{
 			g.drawOval(x2-25,y2-25,110,110);*/
 		}
 
-	
+
 			//g.drawLine(50,50,100,100);
 			/*ArrayList<Point[]> edges = (ArrayList<Point[]>) delaunay.computeEdges();
 			for (int i=0;i<nbPoints;i++){
@@ -76,11 +87,17 @@ public class MonCompo extends Component{
 			}
 
 		}*/
-		
-		
+
+
 
 		public MonCompo(Graphique graph) {
 			super();
 			this.graph = graph;
+			this.itin = null;
+		}
+		public MonCompo(Graphique graph, ITIN itin) {
+			super();
+			this.graph = graph;
+			this.itin = itin;
 		}
 	}

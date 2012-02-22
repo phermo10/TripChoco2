@@ -26,9 +26,10 @@ public class User implements UserInterface {
 	
 	private ArrayList<Place> inter;
 	
+	private ITIN dernierItinCalcule;
 	
 	public User (int id, ArrayList<Tag> userranking, boolean disabled, int speed, int time, Place dep, Place arr, ArrayList<Place> inter ) {
-		
+		this.dernierItinCalcule = null;
 		this.id = id;
 		this.userranking = userranking;
 		this.disabled = disabled;
