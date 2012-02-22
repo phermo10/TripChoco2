@@ -55,10 +55,11 @@ public class MonCompo extends Component{
 			if (itin!=null){
 				g.setColor(Color.red);
 				for (int i=0;i<itin.getEtapes().size()-1;i++){
-					g.fill3DRect((int)itin.getEtapes().get(i).getPosition().getX(),(int)itin.getEtapes().get(i).getPosition().getY(), 10, 10, true);
-					g.drawLine((int)itin.getEtapes().get(i).getPosition().getX(),(int)itin.getEtapes().get(i).getPosition().getY(), (int)itin.getEtapes().get(i+1).getPosition().getX(),(int)itin.getEtapes().get(i+1).getPosition().getY());
+					if(itin.getEtapes().get(i).getNiveauTemps()==NiveauTemps.TEMPS_MOY) g.setColor(Color.GREEN);
+					g.fill3DRect((int)itin.getEtapes().get(i).getPlace().getPosition().getX(),(int)itin.getEtapes().get(i).getPlace().getPosition().getY(), 10, 10, true);
+					g.drawLine((int)itin.getEtapes().get(i).getPlace().getPosition().getX(),(int)itin.getEtapes().get(i).getPlace().getPosition().getY(), (int)itin.getEtapes().get(i+1).getPlace().getPosition().getX(),(int)itin.getEtapes().get(i+1).getPlace().getPosition().getY());
 				}
-				g.fill3DRect((int)itin.getEtapes().get(itin.getEtapes().size()-1).getPosition().getX(),(int)itin.getEtapes().get(itin.getEtapes().size()-1).getPosition().getY(), 10, 10, true);
+				g.fill3DRect((int)itin.getEtapes().get(itin.getEtapes().size()-1).getPlace().getPosition().getX(),(int)itin.getEtapes().get(itin.getEtapes().size()-1).getPlace().getPosition().getY(), 10, 10, true);
 			}
 			
 
