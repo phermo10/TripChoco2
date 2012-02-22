@@ -10,8 +10,4 @@ public enum NiveauTemps {
 	private NiveauTemps(int codeDeNiveau) {
 		this.codeDeNiveau = codeDeNiveau;
 	}
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 78bdb3fa1b9d4a61a0d18ac02be4f739f3adba51
