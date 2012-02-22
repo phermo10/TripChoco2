@@ -1,69 +1,96 @@
 import java.util.ArrayList;
 
 public class ITIN {
-	private ArrayList<Place> etapes;
-	private Place depart;
-	private Place arrivee;
+	private ArrayList<Etape> etapes;
 	public int lastSize;
 	private double distanceTotale;
 	private boolean isImpossible;
 
-	public ITIN(Place depart, Place arrivee){
+	public ITIN(Place depart, NiveauTemps nivTpsDep, Place arrivee, NiveauTemps nivTpsArr){
 		isImpossible = false;
-		etapes = new ArrayList<Place>();
-		this.depart = depart;
-		this.arrivee = arrivee;
+		etapes = new ArrayList<Etape>();
 		lastSize = 0;
 		distanceTotale = 0;
-		etapes.add(depart);
-		etapes.add(arrivee);
+		etapes.add(new Etape(depart, nivTpsDep));
+		etapes.add(new Etape(arrivee, nivTpsArr));
 	}
-	public boolean addEtape(Place s){
-		if(!etapes.contains(s)){etapes.add(s);return false;}{return true;}
+
+	/**
+	 * Voir addEtape(Etape e)
+	 * @param s
+	 * @param niveauDeTempsReste
+	 */
+	public void addEtape(Place s, NiveauTemps niveauDeTempsReste){
+		addEtape(new Etape(s, niveauDeTempsReste));
+	}
+
+	/**
+	 * Ajoute une étape à this.
+	 * Concrètement, cela représente l'insertion de e en avant dernière position dans la liste des etapes (juste avant l'arrivee donc).
+	 * @param e
+	 */
+	public void addEtape(Etape e){
+		if(!etapes.contains(e)){
+			etapes.add(etapes.size()-1,e);
+		}
 	}
 
 	private void majDistanceTotale(){
 		lastSize = etapes.size();
 		if(!isImpossible){
-			ordonnerEtapes();
 			distanceTotale = 0;
 			for(int i=1; i<etapes.size();i++){
-				distanceTotale = distanceTotale + etapes.get(i-1).getPosition().distance(etapes.get(i).getPosition());
+				distanceTotale = distanceTotale + etapes.get(i-1).getPlace().getPosition().distance(etapes.get(i).getPlace().getPosition());
 			}
 		}else{distanceTotale = Double.POSITIVE_INFINITY;}
 	}
 
-	private void ordonnerEtapes(){
-		ArrayList<Place> etapesTriees = new ArrayList<Place>();
-		etapes.remove(depart);
-		etapesTriees.add(depart);
-		double dMin = -1;
-		Place pp = depart;
-		while(etapes.size()>0){
-			dMin = -1;
-			for(Place s : etapes){
-				double d = s.getPosition().distance(pp.getPosition());
-				if(dMin == -1 || dMin > d){
-					dMin = d;
-					pp = s;
+	/*public void ordonnerEtapes(){
+		if(!etapesOrdonnees){
+			ArrayList<Etape> etapesTriees = new ArrayList<Etape>();
+			etapesTriees.add(etapes.get(0));
+			etapes.remove(0);
+			double dMin = -1;
+			Etape pp = depart;
+			while(etapes.size()>0){
+				dMin = -1;
+				for(int i=0;i<etapes.size();i++){
+					Place s = etapes.get(i).getPlace();
+					double d = s.getPosition().distance(pp.getPosition());
+					if(dMin == -1 || dMin > d){
+						dMin = d;
+						pp = s;
+					}
 				}
+				etapes.remove(pp);
+				etapesTriees.add(pp);
 			}
-			etapes.remove(pp);
-			etapesTriees.add(pp);
+			etapesTriees.add(etapes.get(etapes.size()-1));
+			etapes = etapesTriees;
+			etapesOrdonnees=true;
 		}
-		etapesTriees.add(arrivee);
-		etapes = etapesTriees;
-	}
+	}*/
 
-
+	/**
+	 * Distance totale de l'itineraire. Les distances entre étapes sont à vol d'oiseau
+	 */
 	public double getDistTot(){if(!isImpossible){if(lastSize!=etapes.size()){majDistanceTotale();}}return distanceTotale;}
-	
-	public int getDureeTot(int vitesse){
-		int dureeDesEtapes = 0;
-		for(Place etape : etapes){
-			dureeDesEtapes+=etape.getTav(); 
+
+	/**
+	 * Duree totale de l'itineraire. Les trajets entre étapes sont à vol d'oiseau
+	 * @param vitesse
+	 * @return
+	 */
+	public double getDureeTot(int vitesse){
+		double dureeDesEtapes = 0;
+		dureeDesEtapes+=etapes.get(0).getPlace().getTav();
+		Etape e = etapes.get(0);
+		for(int i = 1;i<etapes.size();i++){
+			dureeDesEtapes+=e.getPlace().getPosition().distance(etapes.get(i).getPlace().getPosition())/vitesse;
+			dureeDesEtapes+=etapes.get(i).getPlace().getTav();
+			e = etapes.get(i);
 		}
-		return ((int)Math.floor(getDistTot()/vitesse))+1+dureeDesEtapes;
+		return dureeDesEtapes;
 	}
 
 
@@ -72,17 +99,17 @@ public class ITIN {
 		isImpossible = true;
 	}
 
-
-	public ITIN prolonger(Place newArrivee){
-		ITIN clone = new ITIN(depart, newArrivee);
-		for(Place s : etapes){
-			clone.addEtape(s);
+	/**
+	 * Retourne un itineraire de this.depart à newArrivee passant par toutes les etapes de this 
+	 * @param newArrivee
+	 * @return
+	 */
+	public ITIN prolonger(Place newArrivee, NiveauTemps nivTpsNewArr){
+		ITIN clone = new ITIN(etapes.get(0).getPlace(),etapes.get(0).getNiveauTemps(), newArrivee, nivTpsNewArr);
+		for(Etape e : etapes){
+			clone.addEtape(e);
 		}	
 		return clone;
-	}
-
-	public boolean goesBy(Place s){
-		return etapes.contains(s);
 	}
 
 	public boolean isPossible(){
@@ -96,15 +123,15 @@ public class ITIN {
 	 * @param newPath l'itineraire résultant de l'addition (modification via reference)
 	 * @return
 	 */
-	public boolean tryToGoBy(Place newEtape, ITIN result){
+	public boolean tryToGoBy(Place newEtape, NiveauTemps nivTpsNewEtape, ITIN result){
 		boolean ok = false;
-		Place bestPrec = null; // candidat meilleur precedent
+		Etape bestPrec = null; // candidat meilleur precedent
 		double bestDistTot = -1;
 		for(int i = 0;i<etapes.size()&&!ok;i++){
-			Place prec = etapes.get(i);
+			Etape prec = etapes.get(i);
 			for(int j = 0;i<etapes.size()&&!ok;i++){
-				Place suiv = etapes.get(j);
-				double distPrecNew = prec.getPlusCourtsChemins().get(newEtape).getDistTot();
+				Etape suiv = etapes.get(j);
+				double distPrecNew = prec.getPlace().getPlusCourtsChemins().get(newEtape).getDistTot();
 				double distNewSuiv = newEtape.getPlusCourtsChemins().get(suiv).getDistTot();
 				if(distPrecNew!=Double.POSITIVE_INFINITY && distNewSuiv!=Double.POSITIVE_INFINITY){
 					ok = true;
@@ -117,57 +144,55 @@ public class ITIN {
 			}
 		}
 		if(ok){
-			result = new ITIN(depart, arrivee);
+			result = new ITIN(etapes.get(0).getPlace(),etapes.get(0).getNiveauTemps(), etapes.get(etapes.size()-1).getPlace(),etapes.get(etapes.size()-1).getNiveauTemps());
 			for(int i=0; i<etapes.size();i++){
 				result.addEtape(etapes.get(i));
 				if(etapes.get(i)==bestPrec){
-					result.addEtape(newEtape);
+					result.addEtape(newEtape,nivTpsNewEtape);
 				}
 			}
 		}
 		return ok;
 	}
 
-	public ArrayList<Place> getEtapes(){
+	public ArrayList<Etape> getEtapes(){
 		return etapes;
 	}
-	
+
 	public String toString(){
 		String s = "";
-		s = "Pour aller de " + depart.getId() + " à " + arrivee.getId();
+		s = "Pour aller de " + etapes.get(0).getPlace().getId() + " à " + etapes.get(0).getPlace().getId();
 		if(isPossible()){
-		s+= " il faut passer par : ";
-		for(Place e : etapes){
-			s+="\n" + e.getId(); 
+			s+= " il faut passer par : ";
+			for(Etape e : etapes){
+				s+="\n" + e.getPlace().getId(); 
+			}
+			s+="\nDistance à vol d'oiseau : " + etapes.get(0).getPlace().getPosition().distance(etapes.get(etapes.size()-1).getPlace().getPosition());
 		}
-		s+="\n Distance à vol d'oiseau : " + depart.getPosition().distance(arrivee.getPosition());
-		}
-		else{ s+=" il n'existe pas de chemin.";}
+		else{ s+="\nIl n'existe pas de chemin.";}
 		return s;
 	}
-	
+
 	public String toBeautifulString(int vitesse){
-		String s = "Votre itineraire de " + depart.getId() + " à " + arrivee.getId() + " : ";
+		String s = "Votre itineraire de " + etapes.get(0).getPlace().getId() + " à " + etapes.get(etapes.size()-1).getPlace().getId() + " : ";
 		int dureeActuelle = 0;
 		double distanceActuelle = 0;
 		double distanceTmp = 0;
-		ordonnerEtapes();
-		dureeActuelle = depart.getTav();
-		s+="Visite de " + depart.getId() + " : " + depart.getTav() + " Minutes";;
+		dureeActuelle = etapes.get(0).getPlace().getTav();
+		s+="Visite de " + etapes.get(0).getPlace().getId() + " : " + etapes.get(0).getPlace().getTav() + " Minutes";;
 		int i;
 		for(i=1; i<etapes.size()-1;i++){
-			distanceTmp = etapes.get(i-1).getPosition().distance(etapes.get(i).getPosition());
+			distanceTmp = etapes.get(i-1).getPlace().getPosition().distance(etapes.get(i).getPlace().getPosition());
 			distanceActuelle += distanceTmp;
 			s+="\nMarchez " + distanceTmp + " km";
-			dureeActuelle += 60*distanceTmp/vitesse + etapes.get(i).getTav();
-			s+="\nVisite de " + etapes.get(i).getId() + " : " + etapes.get(i).getTav() + " Minutes";;
+			dureeActuelle += 60*distanceTmp/vitesse + etapes.get(i).getPlace().getTav();
+			s+="\nVisite de " + etapes.get(i).getPlace().getId() + " : " + etapes.get(i).getPlace().getTav() + " Minutes";;
 		}
-		s+="\nMarchez " + etapes.get(etapes.size()-2).getPosition().distance(arrivee.getPosition())
-		+"\nVisite de " + arrivee.getId() + " : " + arrivee.getTav() + " Minutes"
+		s+="\nMarchez " + etapes.get(etapes.size()-2).getPlace().getPosition().distance(etapes.get(etapes.size()-1).getPlace().getPosition())
+		+"\nVisite de " + etapes.get(etapes.size()-1).getPlace().getId() + " : " + etapes.get(etapes.size()-1).getPlace().getTav() + " Minutes"
 		+"\nVous êtes arrivés à destination."
 		+"\nDistance parcourue : " + distanceActuelle
 		+"\nTemps écoulé : " + dureeActuelle;
 		return s;
 	}
-
 }
