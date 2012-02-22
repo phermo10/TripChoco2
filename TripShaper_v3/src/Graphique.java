@@ -14,7 +14,7 @@ import java.util.Scanner;
 
 
 public class Graphique {
-	String graphID;
+	int graphID;
 	ArrayList<Point> myPoints;
 	ArrayList<Point[]> delaunayEdges;
 	ArrayList<Point[]> edges;
@@ -79,7 +79,7 @@ public class Graphique {
 
 	public Graphique(int nbPoints, int nbPointsRegroupement) throws IOException {
 		super();
-		this.graphID="graph"+((int)(Math.random()*1000));
+		this.graphID=((int)(Math.random()*1000));
 		this.delaunay = new Delaunay();
 		this.myPoints = new ArrayList<Point>();
 		this.zonesRegroupement= new ArrayList<ArrayList<Point>>();
@@ -136,7 +136,7 @@ public class Graphique {
 		}
 	}*/
 	
-	public String getID(){
+	public int getID(){
 		return this.graphID;
 	}
 

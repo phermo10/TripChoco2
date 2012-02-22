@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Scanner;
 
 
@@ -127,7 +128,7 @@ public class User implements UserInterface {
 		
 	}
 	
-	public void save() throws IOException{
+	/*public void save() throws IOException{
 		PrintWriter writer =  new PrintWriter(new BufferedWriter
 				(new FileWriter("savings" + File.separator +"Users" + File.separator + this.getId() +".txt")));
 		
@@ -135,9 +136,9 @@ public class User implements UserInterface {
 		writer.println(this.getTime());
 		writer.println(this.getDep().getId());
 		writer.println(this.getArr().getId());
-	}
+	}*/
 	
-	public static User restore (int userid, Graph graph) throws FileNotFoundException{
+	/*public static User restore (int userid, Graph graph) throws FileNotFoundException{
 		String filename = "savings" + File.separator +"Users" + File.separator + userid +".txt";
 		Scanner reader = new Scanner(new File (filename));
 		int id = Integer.parseInt(reader.nextLine());
@@ -180,9 +181,6 @@ public class User implements UserInterface {
 			
 		}*/
 		
-		
-		
-	}
 	
 	
 

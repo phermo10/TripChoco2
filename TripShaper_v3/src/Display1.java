@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.io.File;
+
+import javax.sound.midi.SysexMessage;
 import javax.swing.JFrame;
 import java.util.Arrays;
 
@@ -40,54 +42,71 @@ public class Display1 {
 		mygraph.save();
 		System.out.println("End of writing");*/
 
-		Graph city=null;
-		File savings = new File("savings");
-		File graphs[]=null;
-		if(savings.exists()){
-			graphs = savings.listFiles();
+		Graph userGraph=null;
+		File dossierSavings = new File(Emplacements.DOSSIER_SAVINGS.toString());
+		File villes[]=null;
+		if(dossierSavings.exists()){
+			villes = dossierSavings.listFiles();
 		}
-		boolean newGraph;
-		if(graphs!=null&&graphs.length>0){
-			System.out.println("Il y a déjà " + graphs.length + " graphes personnalisés disponibles :");
-			for(File graph : graphs){
-				System.out.println(graph.getName());
+		boolean newCity;
+		if(villes!=null&&villes.length>0){
+			System.out.println("Il y a déjà " + villes.length + " villes générées :");
+			for(File ville : villes){
+				System.out.println(ville.getName());
 			}
-			System.out.println("Voulez-vous en utiliser un plutot qu'en generer un nouveau ? o(oui)/n(non)");
+			System.out.println("Voulez-vous en utiliser une plutot qu'en generer une nouvelle ? o(oui)/n(non)");
 			String input = lireString();
 			if(input.startsWith("o")){
-				newGraph = false;
-				System.out.println("Veuillez entrer l'ID du user");
+				System.out.println("Veuillez entrer l'ID de la ville à utiliser : ");
 				input = lireString();
-				int id;
-				try{id = Integer.parseInt(input);}catch(Exception e){id=-1;}
-				if(id > -1){
-					city = Graph.restore(Integer.parseInt(input));
+				int cityID;
+				cityID = Integer.parseInt(input);
+				newCity = false;
+				File dossierCity = new File(Emplacements.DOSSIER_GRAPH_BASE.toString() + cityID);
+				if(dossierCity.exists()){
+					File users[] = dossierCity.listFiles();
+					if(users.length>0){
+						System.out.println("Il y a déjà " + users.length + " users générés :");
+						for(File user : users){
+							System.out.println(user.getName());
+						}
+						System.out.println("Souhaitez-vous en utiliser un plutot qu'en créer un nouveau ? o/n");
+						input = lireString();
+						if(input.startsWith("o")){
+							System.out.println("Veuillez entrer l'ID du user à utiliser");
+							input = lireString();
+							int id = Integer.parseInt(input);
+							userGraph = Graph.restore(id,cityID);
+						}						
+					}
 				}else{
 					System.out.println("Erreur");
+					System.exit(0);
 				}
 			}else{
-				newGraph = true;
+				newCity = true;
 			}
-		}else{newGraph = true;}
-		if(newGraph){
+		}else{
+			newCity = true;
+		}
+		if(newCity){
 			System.out.println("Veuillez entrer le nombre de points désirés dans le nouveau graphe");
 			String input = lireString();
 			int n;
 			try{n=Integer.parseInt(input);}catch(Exception e){n=-1;}
 			if(n>-1){
-				city = new Graph(n);
-				User user = new User (2012,4000,180,city.getAllplaces().get(0),city.getAllplaces().get(0));
-				city.setUser(user);
-				city.save();
-				System.out.println("Graphe généré et sauvegardé");
+				userGraph = new Graph(n);
+				User user = new User (2012,4000,180,userGraph.getAllplaces().get(0),userGraph.getAllplaces().get(0));
+				userGraph.setUser(user);
+				userGraph.save();
+				System.out.println("Graphe et user générés et sauvegardés");
 			}else{
 				System.out.println("Erreur");
 			}
 		}
-		
+
 		// Qd on arrive ici le graphe est considéré (chargé) ou (généré et personnalisé)
-		
-		Route bestPath = city.solve();
+		Route bestPath = userGraph.solve();
 		// Afficher l'itineraire calculer
 	} 
 
