@@ -116,7 +116,7 @@ public class Graph implements GraphInterface,Serializable {
 	public Graph(int nbPoints){
 		this();
 		//INITIALISER graphique
-		Graphique graphique;
+		Graphique graphique = null;
 		try {
 			graphique = new Graphique (nbPoints,2);
 			graphique.saveGraph();
