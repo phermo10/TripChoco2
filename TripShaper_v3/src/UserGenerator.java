@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -41,6 +42,13 @@ public class UserGenerator {
 		}
 		
 		return scoresmap;
+		
+	}
+	
+	public static ArrayList<Tag> generateRanking(ArrayList<Tag> alltags){
+		ArrayList<Tag> tagranking = new ArrayList<Tag>(alltags);
+		Collections.shuffle(tagranking);
+		return tagranking;
 		
 	}
 
