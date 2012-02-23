@@ -33,13 +33,13 @@ public class Graph implements GraphInterface,Serializable {
 
 	//public final static int zone_time = 2;
 
-	private ArrayList<Place> allplaces;
+	private Place[] allplaces;
 
-	private HashMap<Integer,Place> placesID;
+	//private HashMap<Integer,Place> placesID;
 
-	private ArrayList<Path> allpaths;
+	//private ArrayList<Path> allpaths;
 
-	private HashMap<Integer,Path> pathsID;
+	//private HashMap<Integer,Path> pathsID;
 
 	private ArrayList<Tag> alltags;
 
@@ -47,69 +47,25 @@ public class Graph implements GraphInterface,Serializable {
 
 	private User user;
 
-	private Graphique dispersion;
+	//private Graphique dispersion;
 
 	private ITIN bestPath;
 
-	public Graph(){
-		this((User)null);
-	}
-
-	public Graph(User user) {
-		this(new ArrayList<Place>(), new ArrayList<Path>(), new ArrayList<Tag> (), user);
-	}
-
-
-	public Graph(ArrayList<Place> allplaces, ArrayList<Path> allpaths, ArrayList<Tag> alltags,User user){
+	private HashMap<Place,Integer> scores;
+	
+	public Graph(Place[] allplaces, ArrayList<Tag> alltags, User user, HashMap<Place,Integer> scores){
 		this.bestPath = null;
 		this.allplaces = allplaces;
-		this.allpaths = allpaths;
+		this.scores = scores;
 		this.alltags= alltags;
-		this.setUser(user);
-		this.pathsID= new HashMap<Integer,Path>();
-		this.placesID = new HashMap<Integer,Place>();
+		this.user = user;
 		this.tagsID = new HashMap<Integer,Tag>();
-
-		for (Place p : this.allplaces){
-			this.placesID.put(p.getId(), p);
-		}
-
-		for (Path p : this.allpaths){
-			this.pathsID.put(p.getId(), p);
-		}
-
 		for (Tag t : this.alltags){
 			this.tagsID.put(t.getId(),t);
 		}
-
 	}
-
-	//---------Constructs a graph from a city (graphique) for a specific user-------
-	//---------Generates all the scores and times----------------
-	public Graph(Graphique city, User user){
-		this(user);
-		this.setDispersion(city);
-		//Creation of the places and paths 
-		for (Point p : city.getMesPoints()){
-			int pID = city.getPointsIDhashmap().get(p);
-			Place newplace = new Place (this,pID,p);
-			newplace.setBasicscore(newplace.basicScore());
-		}
-
-		for (Point[] edge : city.getEdges()){
-			int edgeID = city.getEdgesIDhashmap().get(edge);
-			int end1ID = city.getPointsIDhashmap().get(edge[0]);
-			int end2ID = city.getPointsIDhashmap().get(edge[1]);
-			Place end1 = this.getPlacesID().get(end1ID);
-			Place end2 = this.getPlacesID().get(end2ID);
-			Path newpath = new Path (this,edgeID,end1,end2);
-			newpath.setScore(newpath.rankToScore());
-		}
-
-
-	}
-
-
+	
+	
 
 	//--------- Graph Generator------------
 
