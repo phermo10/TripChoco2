@@ -70,8 +70,16 @@ public class Path implements PathInterface {
 		this.p2 = p2;
 		this.score=score;
 		this.dist = p1.getPosition().distance(p2.getPosition());
+		System.out.println("p1.getPosition() : "+p1.getPosition());
+		System.out.println("p2.getPosition() : "+p2.getPosition());
 		Point[] edge = {p1.getPosition(),p2.getPosition()};
-		System.out.println(edge);
+		//Point[] edgebis = {p2.getPosition(),p1.getPosition()};
+		System.out.println("edge  "+edge[0].getX()+","+edge[0].getY()+";"+edge[1].getX()+","+edge[1].getY());
+		for (int i=0;i<this.getGraph().getDispersion().getEdgesIDhashmap().size();i++){
+			//System.out.println("getEdgesIDhashmap : "+this.getGraph().getDispersion().getEdgesIDhashmap().get(this.)
+		}
+		System.out.println("getEdgesIDhashmap : "+this.getGraph().getDispersion().getEdgesIDhashmap());
+		System.out.println(this.getGraph().getDispersion().getEdgesIDhashmap().get(edge));
 	    this.setId(this.getGraph().getDispersion().getEdgesIDhashmap().get(edge));
 		
 		this.graph.addPath(this);
