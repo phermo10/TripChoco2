@@ -14,7 +14,7 @@ import java.util.Scanner;
 
 
 public class Graphique {
-	String graphID;
+	int graphID;
 	ArrayList<Point> myPoints;
 	ArrayList<Point[]> delaunayEdges;
 	ArrayList<Point[]> edges;
@@ -30,7 +30,7 @@ public class Graphique {
 	HashMap<Point,Integer> pointsIDhashmap ;
 	HashMap<Point[],Integer> edgesIDhashmap ;
 	
-	public Graphique(String graphID){
+	public Graphique(int graphID){
 		this.graphID = graphID;
 		this.myPoints = new ArrayList<Point>();
 		this.delaunay = new Delaunay();
@@ -38,7 +38,7 @@ public class Graphique {
 		edgesIDhashmap = new HashMap<Point[],Integer>();
 		this.edges=new ArrayList<Point[]>();
 		try {
-			String filename = "savings" + File.separator +graphID + File.separator +graphID +".txt";
+			String filename = Emplacements.FICHIER_GRAPH_COMPLET(graphID);
 			Scanner reader = new Scanner(new File (filename));
 			String toRead = reader.nextLine();
 			toRead = reader.nextLine();
@@ -80,7 +80,7 @@ public class Graphique {
 
 	public Graphique(int nbPoints, int nbPointsRegroupement) throws IOException {
 		super();
-		this.graphID="graph"+((int)(Math.random()*1000));
+		this.graphID=((int)(Math.random()*1000));
 		this.delaunay = new Delaunay();
 		this.myPoints = new ArrayList<Point>();
 		this.zonesRegroupement= new ArrayList<ArrayList<Point>>();
@@ -91,7 +91,7 @@ public class Graphique {
 		generateID();
 		saveGraph();
 	}
-
+	
 	public void generateID(){
 		pointsIDhashmap = new HashMap<Point,Integer>();
 		edgesIDhashmap = new HashMap<Point[],Integer>();
@@ -137,7 +137,7 @@ public class Graphique {
 		}
 	}*/
 	
-	public String getID(){
+	public int getID(){
 		return this.graphID;
 	}
 
@@ -307,10 +307,12 @@ public class Graphique {
 	}
 
 	public void saveGraph() throws IOException{
-		File dir = new File ("savings"+File.separator+graphID);
+		File dir = new File (Emplacements.DOSSIER_GRAPH_COMPLET(graphID));
 		dir.mkdirs();
+		File f = new File(Emplacements.FICHIER_GRAPH_COMPLET(graphID));
+		f.createNewFile();
 		PrintWriter writer =  new PrintWriter(new BufferedWriter
-				(new FileWriter("savings" + File.separator +graphID+File.separator +graphID+".txt")));
+				(new FileWriter(Emplacements.FICHIER_GRAPH_COMPLET(graphID))));
 		writer.println("<Places>");
 		for (int i=0;i<myPoints.size();i++){
 			writer.println((int)myPoints.get(i).getX());

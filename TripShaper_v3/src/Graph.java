@@ -48,6 +48,8 @@ public class Graph implements GraphInterface,Serializable {
 	private User user;
 
 	private Graphique dispersion;
+	
+	private ITIN bestPath;
 
 	public Graph(){
 		this((User)null);
@@ -59,7 +61,7 @@ public class Graph implements GraphInterface,Serializable {
 
 
 	public Graph(ArrayList<Place> allplaces, ArrayList<Path> allpaths, ArrayList<Tag> alltags,User user){
-
+		this.bestPath = null;
 		this.allplaces = allplaces;
 		this.allpaths = allpaths;
 		this.alltags= alltags;
@@ -113,8 +115,10 @@ public class Graph implements GraphInterface,Serializable {
 
 	public Graph(int nbPoints){
 		this();
+		//INITIALISER graphique
+		Graphique graphique;
 		try {
-			Graphique graphique = new Graphique (nbPoints,2);
+			graphique = new Graphique (nbPoints,2);
 			graphique.saveGraph();
 			this.setDispersion(graphique);
 		} catch (IOException e) {
@@ -123,7 +127,7 @@ public class Graph implements GraphInterface,Serializable {
 		}
 		ArrayList<Point> mesPoints = this.getDispersion().getMesPoints();
 		ArrayList<Point[]> mesArcs = this.getDispersion().getEdges();
-		HashMap<Point,Place> link = new HashMap<Point,Place>();
+		//HashMap<Point,Place> link = new HashMap<Point,Place>();
 		ArrayList<Point> zone1Edges = this.getDispersion().getZonesRegroupement().get(0);
 		ArrayList<Point> zone2Edges = this.getDispersion().getZonesRegroupement().get(1);
 		//TO DO : ------------------------
@@ -136,11 +140,11 @@ public class Graph implements GraphInterface,Serializable {
 			if (i==nbPoints/2 || i == nbPoints/3 || i == nbPoints/6 || i==  nbPoints/10 ){
 				Place p = new Place (this, mesPoints.get(i),10 + (int) (110*(1-Math.random())), (int)(100*(1-0.5*Math.random())));
 				
-				link.put(mesPoints.get(i),p);
+				//link.put(mesPoints.get(i),p);
 			}
 			else {
 				Place p = new Place(this,mesPoints.get(i),10 + (int)(110*(1- Math.random())),(int)(100*(1-Math.random())));
-				link.put(mesPoints.get(i),p);
+				//link.put(mesPoints.get(i),p);
 			}
 		}
 
@@ -148,8 +152,13 @@ public class Graph implements GraphInterface,Serializable {
 			//time : entre 0 et 30min  ; score : etre 0 et 30
 			Point point1 = mesArcs.get(i)[0];
 			Point point2 = mesArcs.get(i)[1];
-			Place p1 = link.get(point1);
-			Place p2 = link.get(point2);
+			//Place p1 = link.get(point1);
+			//Place p2 = link.get(point2);
+			int point1id = graphique.getEdgesIDhashmap().get(point1);
+			int point2id = graphique.getEdgesIDhashmap().get(point2);
+			Place p1 = this.getPlacesID().get(point1id);
+			Place p2 = this.getPlacesID().get(point2id);
+			
 			if ((zone1Edges.contains(point1) && zone1Edges.contains(point2)) || (zone2Edges.contains(point1) && zone2Edges.contains(point2)) ){
 				System.out.println("blablaBLA" + this.getDispersion().getEdgesIDhashmap());
 				Path path = new Path(this,p1,p2,0);
@@ -319,9 +328,10 @@ public class Graph implements GraphInterface,Serializable {
 
 	}
 
-	public Route solve() {
-		return new Route();
-			}
+	public void solve() {
+		Solver s = new Solver(this);
+		this.bestPath = s.computeBestPath();
+	}
 
 
 
@@ -335,9 +345,10 @@ public class Graph implements GraphInterface,Serializable {
 		//POUR LE TEST UNIQUEMENT
 		//this.user = new User(300,this.getAllplaces().get(1),this.getAllplaces().get(1));
 
-
+		File f = new File(Emplacements.FICHIER_USER_COMPLET(this.getDispersion().getID(),this.getUser().getId()));
+		f.mkdirs();
 		PrintWriter writer =  new PrintWriter(new BufferedWriter
-				(new FileWriter("savings" + File.separator + this.getDispersion().getID() + File.separator + "User" + this.getUser().getId() +".txt")));
+				(new FileWriter(Emplacements.FICHIER_USER_COMPLET(this.getDispersion().getID(),this.getUser().getId()))));
 		writer.println("<User>");
 		writer.println(this.getUser().getId());
 		writer.println(this.getUser().getSpeed());
@@ -397,7 +408,7 @@ public class Graph implements GraphInterface,Serializable {
 		frame.setVisible(true);
 	}
 
-	public static Graph restore(int userid, String graphid) throws FileNotFoundException {
+	public static Graph restore(int userid, int graphid) throws FileNotFoundException {
 		/*XMLDecoder decoder = new XMLDecoder(new FileInputStream("Graph" + userid + ".xml"));
 		Graph g = (Graph) decoder.readObject();
 		decoder.close();
@@ -425,7 +436,7 @@ public class Graph implements GraphInterface,Serializable {
 		}
 		
 		//Now we have to put scores and times on both places and paths
-		String filename = "savings" + File.separator + graphid + File.separator +"User" + userid +".txt";
+		String filename = Emplacements.FICHIER_USER_COMPLET(graphid, userid);
 		Scanner reader = new Scanner(new File (filename));
 		//<User>
 		String toRead = reader.nextLine();
