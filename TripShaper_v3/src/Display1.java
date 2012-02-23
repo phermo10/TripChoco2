@@ -43,7 +43,7 @@ public class Display1 {
 		System.out.println("End of writing");*/
 
 		Graph userGraph=null;
-		File dossierSavings = new File(Emplacements.DOSSIER_SAVINGS.toString());
+		File dossierSavings = new File(Emplacements.DOSSIER_SAVINGS);
 		File villes[]=null;
 		if(dossierSavings.exists()){
 			villes = dossierSavings.listFiles();
@@ -62,7 +62,7 @@ public class Display1 {
 				int cityID;
 				cityID = Integer.parseInt(input);
 				newCity = false;
-				File dossierCity = new File(Emplacements.DOSSIER_GRAPH_BASE.toString() + cityID);
+				File dossierCity = new File(Emplacements.DOSSIER_GRAPH_COMPLET(cityID));
 				if(dossierCity.exists()){
 					File users[] = dossierCity.listFiles();
 					if(users.length>0){
@@ -99,6 +99,7 @@ public class Display1 {
 				User user = new User (2012,4000,180,userGraph.getAllplaces().get(0),userGraph.getAllplaces().get(0));
 				userGraph.setUser(user);
 				userGraph.save();
+				userGraph.display();
 				System.out.println("Graphe et user générés et sauvegardés");
 			}else{
 				System.out.println("Erreur");
@@ -106,7 +107,9 @@ public class Display1 {
 		}
 
 		// Qd on arrive ici le graphe est considéré (chargé) ou (généré et personnalisé)
-		Route bestPath = userGraph.solve();
+		//ITIN bestPath = userGraph.solve();
+		userGraph.solve();
+		userGraph.display();
 		// Afficher l'itineraire calculer
 	} 
 

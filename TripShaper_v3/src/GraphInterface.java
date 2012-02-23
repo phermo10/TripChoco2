@@ -87,7 +87,7 @@ public interface GraphInterface {
 	 * 
 	 * @return the best route for the user
 	 */
-	public Route solve();
+	public void solve();
 	
 	/**
 	 * Saves the Graph to a textfile

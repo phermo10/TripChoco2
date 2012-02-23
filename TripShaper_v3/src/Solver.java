@@ -1,6 +1,7 @@
 import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -17,11 +18,11 @@ public class Solver {
 
 	private int maxScore;
 	private final int dureeMaxDesVisites = 50; //minutes
-
 	private ITIN best;
-
+	private Graph graph;
+	
 	public Solver(/*String emplacementArretId,*/ Graph graph){
-
+		this.graph = graph;
 		/*
 		System.out.println("Calcul du score max :");
 		Date t1 = new Date();
@@ -66,36 +67,17 @@ public class Solver {
 		//showNetwork();
 		//DialogMap dm = new DialogMap("Saisie des Places", null, graph, 0, maxScore);
 		//dm.setVisible(true);
-		Place source = graph.getUser().getDep();
-		Place destination = graph.getUser().getArr();
 		//if(dm.getResult()!=null){
 			//Place source = dm.getResult()[0];
 			//Place destination = dm.getResult()[1];
 			//if(source!=null && destination!=null){
-				System.out.println("Vous souhaitez aller de " + source + " vers " + destination);
-				System.out.println("Vitesse de déplacement : 4km/h");
-				System.out.println("Temps dispo : " + graph.getUser().getTime() +"minutes");
-				System.out.println("Calcul de l'itineraire maximisant le score");
-				Date t1 = new Date();
-				ITIN best = computeBestPath(graph);
-				Date t2 = new Date();
-				System.out.println("Durée : " + (t2.getTime() - t1.getTime()) + "ms");
-				if(best!=null){
-					/*DialogMap displayBestResult = new DialogMap("Votre itineraire", best, graph, 4000, maxScore);
-					displayBestResult.setVisible(true);
-					displayBestResult.dispose();*/
-					this.best = best;
-					System.out.println("Itinéraire ok");
-				}
-				else
-				{
-					System.out.println("Aucun itineraire possible entre ces deux Places dans le temps imparti");}
 
 			//}
 			//else{System.out.println("Vous n'avez sélectionné aucune Place");
 		}
 
-
+	
+	
 	/*private void showNetwork(Graph graph){
 		/*for(Place s : graph.getListePlaces()){
 			//System.out.println(s.getNom() + " " + s.getCoords());
@@ -150,7 +132,7 @@ public class Solver {
 		return ms;
 	}*/
 
-	private boolean computeShortestPaths(Graph graph){
+	private boolean computeShortestPaths(){
 		int count = 0;
 		int tot = graph.getAllplaces().size();
 		for(Place depart : graph.getAllplaces()){
@@ -229,7 +211,7 @@ public class Solver {
 			visites.clear();
 			visites.trimToSize();
 		}
-		return sauvegarderPlusCourtsChemins(graph);
+		return sauvegarderPlusCourtsChemins();
 	}
 
 	private Place getPlusProche(HashMap<Place, Double> distances, ArrayList<Place> nonVisites){
@@ -246,7 +228,6 @@ public class Solver {
 			}
 		}
 		return pp;
-
 	}
 
 	/**
@@ -257,7 +238,14 @@ public class Solver {
 	 * @param minutesDispo
 	 * @return
 	 */
-	public ITIN computeBestPath(Graph graph){
+	public ITIN computeBestPath(){
+		File pccFile = new File(Emplacements.FICHIER_PCC(graph.getDispersion().getID()));
+		if(!pccFile.exists()){
+			System.out.println("Les pcc n'ont pas ete precalcules. Calcul...");
+			System.out.println("Succes = " + computeShortestPaths());
+		}else{
+			chargerPlusCourtsChemins();
+		}
 		ITIN bestPath = null;
 		Place depart = graph.getUser().getDep();
 		Place arrivee = graph.getUser().getArr();
@@ -269,7 +257,7 @@ public class Solver {
 		// Simplification du graphe
 		Graph g = graph.simplify();
 
-				//simplifyGraph(depart, vitesse, minutesDispo, graph);
+		//simplifyGraph(depart, vitesse, minutesDispo, graph);
 		Date t2 = new Date();
 		System.out.println("Durée : " + (t2.getTime() - t1.getTime()) + "ms");
 		//	----------------------------
@@ -436,12 +424,14 @@ public class Solver {
 		public static final String BY = "\t\t<BY=";
 	}
 
-	private boolean sauvegarderPlusCourtsChemins(Graph graph){
+	private boolean sauvegarderPlusCourtsChemins(){
 		boolean success = true;	
 		PrintWriter output=null;
 		System.out.println("Sauvegarde des plus courts chemin...");
 		try {
-			output = new PrintWriter(new BufferedWriter(new FileWriter("plusCourtsChemins.txt")));
+			File f = new File(Emplacements.FICHIER_PCC(graph.getDispersion().getID()));
+			f.mkdirs();
+			output = new PrintWriter(new BufferedWriter(new FileWriter(Emplacements.FICHIER_PCC(graph.getDispersion().getID()))));
 			String line;
 			for(Place from : graph.getAllplaces()){
 				output.println(Balises.FROM_Begin +from.getId()+">");
@@ -474,13 +464,13 @@ public class Solver {
 		return success;
 	}
 
-	private boolean chargerPlusCourtsChemins(Graph graph){
+	private boolean chargerPlusCourtsChemins(){
 		//if(graph.isCoordsLoaded()) throw new IllegalArgumentException("Graph coords must not be loaded before calling this method.");
 		boolean success = true;
 		
 		ArrayList<String> lines = new ArrayList<String>();
 		try {
-			BufferedReader input =  new BufferedReader(new FileReader("plusCourtsChemins.txt"));
+			BufferedReader input =  new BufferedReader(new FileReader(Emplacements.FICHIER_PCC(graph.getDispersion().getID())));
 			try {
 				String line = null; 
 

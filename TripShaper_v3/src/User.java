@@ -39,7 +39,6 @@ public class User implements UserInterface {
 		this.dep = dep;
 		this.arr=arr;
 		this.inter = inter;
-		
 	}
 	
 	public User(int id,ArrayList<Tag> userranking,int time, Place dep, Place arr){
