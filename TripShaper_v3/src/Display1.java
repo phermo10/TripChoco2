@@ -48,7 +48,7 @@ public class Display1 {
 		if(dossierSavings.exists()){
 			villes = dossierSavings.listFiles();
 		}
-		boolean newCity;
+		boolean newUser=true;
 		if(villes!=null&&villes.length>0){
 			System.out.println("Il y a déjà " + villes.length + " villes générées :");
 			for(File ville : villes){
@@ -61,12 +61,11 @@ public class Display1 {
 				input = lireString();
 				int cityID;
 				cityID = Integer.parseInt(input);
-				newCity = false;
 				File dossierCity = new File(Emplacements.DOSSIER_GRAPH_COMPLET(cityID));
 				if(dossierCity.exists()){
 					File users[] = dossierCity.listFiles();
-					if(users.length>0){
-						System.out.println("Il y a déjà " + users.length + " users générés :");
+					if(users.length-1>0){
+						System.out.println("Il y a déjà " + (users.length - 1) + " users générés :");
 						for(File user : users){
 							System.out.println(user.getName());
 						}
@@ -77,19 +76,23 @@ public class Display1 {
 							input = lireString();
 							int id = Integer.parseInt(input);
 							userGraph = Graph.restore(id,cityID);
+							newUser=false;
+						}else{
+							newUser = true;							
 						}						
 					}
 				}else{
+					
 					System.out.println("Erreur");
 					System.exit(0);
 				}
 			}else{
-				newCity = true;
+				newUser=true;
 			}
 		}else{
-			newCity = true;
+			newUser=true;
 		}
-		if(newCity){
+		if(newUser){
 			System.out.println("Veuillez entrer le nombre de points désirés dans le nouveau graphe");
 			String input = lireString();
 			int n;
@@ -99,13 +102,13 @@ public class Display1 {
 				User user = new User (2012,4000,180,userGraph.getAllplaces().get(0),userGraph.getAllplaces().get(0));
 				userGraph.setUser(user);
 				userGraph.save();
-				userGraph.display();
 				System.out.println("Graphe et user générés et sauvegardés");
 			}else{
 				System.out.println("Erreur");
 			}
 		}
 
+		userGraph.display();
 		// Qd on arrive ici le graphe est considéré (chargé) ou (généré et personnalisé)
 		//ITIN bestPath = userGraph.solve();
 		userGraph.solve();
