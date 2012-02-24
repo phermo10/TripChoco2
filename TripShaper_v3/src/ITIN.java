@@ -127,13 +127,15 @@ public class ITIN {
 	 */
 	public boolean tryToGoBy(Place newEtape, NiveauTemps nivTpsNewEtape, ITIN result, Graph graph){
 		boolean ok = false;
+		
 		Etape bestPrec = null; // candidat meilleur precedent
 		double bestDistTot = -1;
+		
 		for(int i = 0;i<etapes.size()&&!ok;i++){
 			Etape prec = etapes.get(i);
+			double distPrecNew = graph.getAllShPa().get(prec.getPlace()).get(newEtape).getDistTot();
 			for(int j = 0;i<etapes.size()&&!ok;i++){
 				Etape suiv = etapes.get(j);
-				double distPrecNew = graph.getAllShPa().get(prec.getPlace()).get(newEtape).getDistTot();
 				double distNewSuiv = graph.getAllShPa().get(suiv.getPlace()).get(newEtape).getDistTot();
 				if(distPrecNew!=Double.POSITIVE_INFINITY && distNewSuiv!=Double.POSITIVE_INFINITY){
 					ok = true;
