@@ -66,4 +66,6 @@ public class Place {
 		}
 		return satt;
 	}
+	
+	public String toString(){return "Place={" + this.getPosition().x+","+this.getPosition().y+"}";}
 }

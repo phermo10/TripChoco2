@@ -124,12 +124,22 @@ public class Display1 {
 		userGraph.display();
 		// Afficher l'itineraire calculer*/
 
-		CityGenerator city = new CityGenerator(30,2);
+		
 		//FAIRE UN GETTER DANS CITYGENERATOR
-		User user = UserGenerator.generateBasicUser(city.getPlaces());
-		HashMap<Place,Integer> scores = UserGenerator.generateRandomScores(city.getPlaces());
-		Graph userGraph = new Graph(city.getTousPCC(),city.getPlaces(), new ArrayList<Tag>(), user,scores, city.getCityID(),city.getCityDiameter());
-		userGraph.save();
+		//User user = UserGenerator.generateBasicUser(city.getPlaces());
+		//HashMap<Place,Integer> scores = UserGenerator.generateRandomScores(city.getPlaces());
+		//Graph userGraph = new Graph(city.getTousPCC(),city.getPlaces(), new ArrayList<Tag>(), user,scores, city.getCityID(),city.getCityDiameter());
+
+		Graph userGraph;
+		if(true){
+			userGraph = new Graph(1346,513);	
+		}else{
+			CityGenerator city = new CityGenerator(30,2);
+			User user = UserGenerator.generateBasicUser(city.getPlaces());
+			HashMap<Place,Integer> scores = UserGenerator.generateRandomScores(city.getPlaces());
+			userGraph = new Graph(city.getTousPCC(),city.getPlaces(), new ArrayList<Tag>(), user,scores, city.getCityID(),city.getCityDiameter());
+			userGraph.save();
+		}
 		userGraph.display();
 		System.out.println("Graphe et user générés et sauvegardés");
 		System.out.println("Calcul du meilleur chemin le plus fun avec des trucs cools...");

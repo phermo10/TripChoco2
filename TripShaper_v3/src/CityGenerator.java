@@ -24,7 +24,7 @@ public class CityGenerator {
 		this.gen = new PointsGenerator(cityID);
 		this.calc = new ShortestPathsCalculator(cityID,gen.getPlaces());
 	}
-	
+
 	public CityGenerator(int nbPoints, int nbRegroupements) throws IOException{
 		this.gen = new PointsGenerator(nbPoints, nbRegroupements);
 		this.calc = new ShortestPathsCalculator(gen.getPlaces());
@@ -36,6 +36,7 @@ public class CityGenerator {
 		dir.mkdirs();
 		PrintWriter writer =  new PrintWriter(new BufferedWriter
 				(new FileWriter(Emplacements.FICHIER_GRAPH_COMPLET(gen.getID()))));
+		writer.println(gen.getCityDiameter());
 		writer.println(gen.getPlaces().size());
 		writer.println("<Places>");
 		for (int i=0;i<gen.getPlaces().size();i++){
@@ -56,34 +57,33 @@ public class CityGenerator {
 		// Sauvegarde des pcc
 		PrintWriter output=null;
 		output = new PrintWriter(new BufferedWriter(new FileWriter(Emplacements.FICHIER_PCC(gen.getID()))));
-		Place from;
-		for(int fromIndex = 0; fromIndex<gen.getPlaces().size();fromIndex++){
-			from = gen.getPlaces().get(fromIndex);
-			output.println(Balises.FROM_X +from.getPosition().x+">");
-			output.println(Balises.FROM_Y +from.getPosition().y+">");
+		output.println(gen.getPlaces().size());
+		for(Place from : gen.getPlaces()){
+			output.println(from.getPosition().x);
+			output.println(from.getPosition().y);
 			for(Place to : gen.getPlaces()){
 				if(!from.equals(to)){
-					output.println(Balises.TO_X+to.getPosition().x+">");
-					output.println(Balises.TO_Y+to.getPosition().y+">");
+					output.println(to.getPosition().x);
+					output.println(to.getPosition().y);
 					ITIN etapes = calc.getPCC().get(from).get(to);
+					output.println(etapes.getEtapes().size()-2);
 					for(Etape etape : etapes.getEtapes()){
 						if(!(etape.getPlace().equals(to)||etape.getPlace().equals(from))){
-							output.println(Balises.BY_X + etape.getPlace().getPosition().x+">");
-							output.println(Balises.BY_Y + etape.getPlace().getPosition().y+">");}
+							output.println(etape.getPlace().getPosition().x);
+							output.println(etape.getPlace().getPosition().y);
+						}
 					}
-					output.println(Balises.TO_End);
 				}
 			}
-			output.println(Balises.FROM_End);
 		}
 
 	}
 	public int getCityDiameter(){return this.gen.getCityDiameter();}
 	public int getCityID(){return this.gen.cityID;}
-	
+
 	public ArrayList<Place> getPlaces(){return gen.getPlaces();}
 	public HashMap<Place,HashMap<Place,ITIN>> getTousPCC(){return calc.getPCC();}
-	
+
 	private class Balises{
 		public static final String FROM_X = "<FROMX=";
 		public static final String FROM_Y = "<FROMY=";
@@ -108,26 +108,30 @@ public class CityGenerator {
 		private ArrayList<Place> places;
 		private int cityID;
 		private boolean[][] edgesMatrix;
-		
+
 		private int cityDiameter;
-		
+
 		public int getCityDiameter(){return cityDiameter;}
-		
+
 		public PointsGenerator(int cityID) throws IOException{
 			this.cityID = cityID;
+			this.places = new ArrayList<Place>();
 			String filename = Emplacements.FICHIER_GRAPH_COMPLET(cityID);
 			Scanner reader = new Scanner(new File (filename));
 			String toRead = reader.nextLine();
 			this.cityDiameter = Integer.parseInt(toRead);
 			toRead = reader.nextLine();
-			toRead = reader.nextLine();
+			int nbPoints = Integer.parseInt(toRead); // size
+			edgesMatrix = new boolean[nbPoints][nbPoints];
+			toRead = reader.nextLine();// <Places>
 			toRead = reader.nextLine();
 			do {
 				int x = Integer.parseInt(toRead);
 				toRead=reader.nextLine();
 				int y = Integer.parseInt(toRead);
 				Point position = new Point(x,y);
-				places.add(new Place(position,Integer.parseInt(reader.nextLine())));
+				toRead = reader.nextLine();
+				places.add(new Place(position,Integer.parseInt(toRead)));
 				toRead=reader.nextLine();
 			}while (!toRead.equals("</Places>"));
 
@@ -499,73 +503,43 @@ public class CityGenerator {
 		public ShortestPathsCalculator(int cityID, ArrayList<Place> places) throws IOException{
 			this.pcc = new HashMap<Place, HashMap<Place,ITIN>>();
 			// Chargement des PCC
-			ArrayList<String> lines = new ArrayList<String>();
 			BufferedReader input =  new BufferedReader(new FileReader(Emplacements.FICHIER_PCC(cityID)));
-			String line = null; 
-
-			while (( line = input.readLine()) != null){
-				lines.add(line);
+			int nbPoints = Integer.parseInt(input.readLine());
+			int i = 1;
+			while(i<=nbPoints){
+				HashMap<Place,ITIN> plusCourtsChemins = new HashMap<Place, ITIN>();
+				int fromX = Integer.parseInt(input.readLine());
+				int fromY = Integer.parseInt(input.readLine());
+				Place fromTmp = new Place(new Point(fromX,fromY),-1);
+				Place from = places.get(places.indexOf(fromTmp));
+				int j = 1;
+				while(j<=nbPoints-1){
+					int toX = Integer.parseInt(input.readLine());
+					int toY = Integer.parseInt(input.readLine());
+					Place toTmp = new Place(new Point(toX,toY),-1);
+					Place to = places.get(places.indexOf(toTmp));
+					ITIN chem = new ITIN(from, NiveauTemps.TEMPS_MOY, to, NiveauTemps.TEMPS_MOY);
+					int nbEtapes = Integer.parseInt(input.readLine());
+					System.out.println(nbEtapes);
+					int k = 1;
+					while(k<=nbEtapes){
+						int byX = Integer.parseInt(input.readLine());
+						System.out.println(byX);
+						int byY = Integer.parseInt(input.readLine());
+						System.out.println(byY);
+						Place byTmp = new Place(new Point(byX,byY),-1);
+						System.out.println(byTmp);
+						System.out.println(places);
+						Place by = places.get(places.indexOf(byTmp));
+						chem.addEtape(by, NiveauTemps.PAS_DE_VISITE);
+						k++;
+					}
+					plusCourtsChemins.put(to, chem);
+					j++;
+				}
+				pcc.put(from, plusCourtsChemins);
+				i++;
 			}
-			HashMap<Place,ITIN> plusCourtsChemins = null;
-			int fromX=-1;
-			int fromIndex=-1;
-			int toX=-1;
-			int toIndex=-1;
-			int byX=-1;
-			int byIndex=-1;
-			ITIN chem = null;
-			for(int i=0;i<lines.size(); i++){
-				line = lines.get(i);
-				if(line.startsWith(Balises.FROM_X)){
-					fromX = Integer.parseInt(line.substring(Balises.FROM_X.length(),line.length()-1));
-				}
-				if(line.startsWith(Balises.FROM_Y)){
-					int fromY = Integer.parseInt(line.substring(Balises.FROM_Y.length(),line.length()-1));
-					Place from = new Place(new Point(fromX,fromY),-1);
-					fromIndex = places.indexOf(from);
-					if(fromIndex > -1){
-						plusCourtsChemins = new HashMap<Place, ITIN>();
-					}else{
-						plusCourtsChemins = null;
-					}
-				}
-				if(line.startsWith(Balises.TO_X)&&fromIndex > -1){
-					toX = Integer.parseInt(line.substring(Balises.TO_X.length(),line.length()-1));
-				}
-				if(line.startsWith(Balises.TO_Y)&&fromIndex > -1){
-					int toY = Integer.parseInt(line.substring(Balises.TO_X.length(),line.length()-1));
-					Place to = new Place(new Point(toX,toY),-1);
-					toIndex = places.indexOf(to);
-					to = null;
-					if(toIndex>-1){
-						chem = new ITIN(places.get(fromIndex),NiveauTemps.TEMPS_MOY,places.get(toIndex),NiveauTemps.TEMPS_MOY);
-					}else{
-						chem = null;
-					}
-				}
-				if(line.startsWith(Balises.BY_X)&&fromIndex > -1&&toIndex>-1){
-					byX = Integer.parseInt(line.substring(Balises.BY_X.length(),line.length()-1));
-				}
-				if(line.startsWith(Balises.BY_Y)&&fromIndex > -1&&toIndex>-1){
-					int byY = Integer.parseInt(line.substring(Balises.BY_Y.length(),line.length()-1));
-					Place by= new Place(new Point(byX,byY),-1); 
-					byIndex = places.indexOf(by);
-					by = null;
-					if(byIndex>-1){
-						chem.addEtape(new Etape(places.get(byIndex),NiveauTemps.PAS_DE_VISITE));
-					}
-				}
-				if(line.startsWith(Balises.TO_End)&&fromIndex > -1&&toIndex>-1&&byIndex>-1){
-					plusCourtsChemins.put(places.get(toIndex), chem);
-				}
-				if(line.startsWith(Balises.FROM_End)&&fromIndex > -1&&toIndex>-1&&byIndex>-1){
-					pcc.put(places.get(fromIndex),plusCourtsChemins);
-					fromIndex=-1;
-					toIndex=-1;
-					byIndex=-1;
-				}
-			}
-
 		}
 
 		/*private ArrayList<Place> getSommetsAtteignables(Place p, ArrayList<Place> places){
