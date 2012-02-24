@@ -12,4 +12,7 @@ public class Etape {
 				return ((Etape)o).getPlace().equals(getPlace());
 			}else{return false;}
 		}
-	}
+		public String toString(){
+			return p.toString();
+		}
+}

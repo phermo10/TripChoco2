@@ -22,7 +22,7 @@ public class Display1 {
 	static int tailleZoneRegroupement=20;
 	static int distanceBetweenPointAndZone=30;
 
-	public static void main(String[] args) throws IOException { 
+	public static void main(String[] args) throws Exception { 
 		/*JFrame frame = new JFrame(); 
 
 		frame.setSize(new Dimension(xWindow+50,yWindow+50)); 
@@ -132,10 +132,10 @@ public class Display1 {
 
 		Graph userGraph;
 		if(false){
-			userGraph = new Graph(1346,513);	
+			userGraph = new Graph(4375,627);	
 		}else{
-			CityGenerator city = new CityGenerator(30,2);
-			User user = UserGenerator.generateBasicUser(city.getPlaces());
+			CityGenerator city = new CityGenerator(10,3,3, 50000, 100000); // il faut nbZones * nbPoitsMaxParZone < nbPointsTotal
+			User user = UserGenerator.generateBasicUser(city.getPlaces(), true, 1.11, 10800); // 1.11 m/s = 4 km/h ; 10800 sec = 180 minutes = 3h
 			HashMap<Place,Integer> scores = UserGenerator.generateRandomScores(city.getPlaces());
 			userGraph = new Graph(city.getTousPCC(),city.getPlaces(), new ArrayList<Tag>(), user,scores, city.getCityID(),city.getCityDiameter());
 			userGraph.save();

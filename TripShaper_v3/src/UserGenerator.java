@@ -21,12 +21,17 @@ public class UserGenerator {
 		
 	}*/
 	
-	public static User generateBasicUser(ArrayList<Place> allplaces){
+	/**
+	 * Vitesses en m/s
+	 * Temps en s
+	 */
+	public static User generateBasicUser(ArrayList<Place> allplaces, boolean closedCircuit, double speed, int time){
 		Random generator = new Random();
 		int id = generator.nextInt(maxID);
-		Place dep = allplaces.get(generator.nextInt(allplaces.size() - 1));
-		Place arr = allplaces.get(generator.nextInt(allplaces.size() - 1));
-		return new User(id,1.11,10800,dep,arr); // 1.11 m/s = 4 km/h ; 10800 sec = 180 minutes = 3h
+		int i1 = generator.nextInt(allplaces.size() - 1);
+		Place dep = allplaces.get(i1);
+		Place arr = allplaces.get(closedCircuit?i1:generator.nextInt(allplaces.size() - 1));
+		return new User(id,speed,time,dep,arr); 
 	}
 	
 	public static HashMap<Place,Integer> generateRandomScores(ArrayList<Place> myPlaces){

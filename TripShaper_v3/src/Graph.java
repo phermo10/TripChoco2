@@ -54,6 +54,7 @@ public class Graph implements GraphInterface,Serializable {
 	
 	
 	public Graph(int userID, int cityID) throws IOException{
+		this.scores = new HashMap<Place, Integer>();
 		this.cityID = cityID;
 		CityGenerator citygen = new CityGenerator(cityID);
 		this.cityDiameter = citygen.getCityDiameter();
@@ -64,7 +65,7 @@ public class Graph implements GraphInterface,Serializable {
 		Scanner reader = new Scanner(new File (filename));
 		String toRead = reader.nextLine();		//<User>
 		int userId = Integer.parseInt(reader.nextLine());
-		int speed = Integer.parseInt(reader.nextLine());
+		double speed = Double.parseDouble(reader.nextLine());
 		int time = Integer.parseInt(reader.nextLine());
 		int depX = Integer.parseInt(reader.nextLine());
 		int depY = Integer.parseInt(reader.nextLine());
@@ -79,7 +80,7 @@ public class Graph implements GraphInterface,Serializable {
 			
 		reader.nextLine(); // <Places>
 		int placeIndex = 0;
-		while((toRead=reader.nextLine())!="</Places>"){
+		while(!(toRead=reader.nextLine()).equals("</Places>")){
 			int pScore = Integer.parseInt(toRead);
 			scores.put(this.allplaces.get(placeIndex), pScore);
 			placeIndex++;
@@ -98,9 +99,9 @@ public class Graph implements GraphInterface,Serializable {
 		this.alltags= alltags;
 		this.user = user;
 		this.tagsID = new HashMap<Integer,Tag>();
-		for (Tag t : this.alltags){
+		/*for (Tag t : this.alltags){
 			this.tagsID.put(t.getId(),t);
-		}
+		}*/
 	}
 
 	public int getCityID(){return this.cityID;}
@@ -147,11 +148,9 @@ public class Graph implements GraphInterface,Serializable {
 		ArrayList<Place> places = new ArrayList<Place>();
 		// Tri par rayon parcourable
 		double rayonMaxParcourable = this.getUser().getSpeed() * this.getUser().getTime() / 2;
-		System.out.println("Rayon max parcourable " + rayonMaxParcourable);
 		for(Place pl : this.getAllplaces()){
 			if(this.getUser().getDep().getPosition().distance(pl.getPosition())*coeffDistance()<rayonMaxParcourable){
 				places.add(pl);
-				System.out.println("Add " + pl);
 			}
 		}
 		return new Graph(allShPa, places,this.getAlltags(),this.getUser(),this.getScores(),this.cityID,this.cityDiameter);
@@ -165,7 +164,7 @@ public class Graph implements GraphInterface,Serializable {
 		this.scores = scores;
 	}
 
-	public void solve() {
+	public void solve() throws Exception {
 		Solver s = new Solver(this);
 		this.bestPath = s.computeBestPath();
 	}

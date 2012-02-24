@@ -7,14 +7,19 @@ public class ITIN {
 	private boolean isImpossible;
 
 	public ITIN(Place depart, NiveauTemps nivTpsDep, Place arrivee, NiveauTemps nivTpsArr){
-		isImpossible = false;
-		etapes = new ArrayList<Etape>();
-		lastSize = 0;
-		distanceTotale = 0;
-		etapes.add(new Etape(depart, nivTpsDep));
-		etapes.add(new Etape(arrivee, nivTpsArr));
+		this(new Etape(depart, nivTpsDep),new Etape(arrivee, nivTpsArr));
 	}
 
+	
+	public ITIN(Etape depart, Etape arrivee){
+		isImpossible = false;
+		etapes = new ArrayList<Etape>();
+		etapes.add(depart);
+		etapes.add(arrivee);
+		distanceTotale = 0;
+		lastSize = 0;
+	}
+	
 	/**
 	 * Voir addEtape(Etape e)
 	 * @param s
@@ -30,9 +35,7 @@ public class ITIN {
 	 * @param e
 	 */
 	public void addEtape(Etape e){
-		if(!etapes.contains(e)){
 			etapes.add(etapes.size()-1,e);
-		}
 	}
 
 	private void majDistanceTotale(){
@@ -120,43 +123,73 @@ public class ITIN {
 
 	/**
 	 * On recherche le meilleur endroit où inserer cette nouvelle étape pour minimiser la distance parcourue
-	 * Si aucune des étapes actuelle ne permet de rejoindre la nouvelle étape, retourne false. True si c'est possible.
+	 * Si aucune des étapes actuelle ne permet de rejoindre la nouvelle étape, retourne null.
 	 * @param newEtape l'étape à ajouter
 	 * @param newPath l'itineraire résultant de l'addition (modification via reference)
 	 * @return
+	 * @throws Exception 
 	 */
-	public boolean tryToGoBy(Place newEtape, NiveauTemps nivTpsNewEtape, ITIN result, Graph graph){
-		boolean ok = false;
+	public ITIN tryToGoBy(Place newEtape, Graph graph) throws Exception{
+		ITIN result = null;
 		
-		Etape bestPrec = null; // candidat meilleur precedent
-		double bestDistTot = -1;
+		System.out.println("ITIN " + getEtapes() + " TryToGoBy " + newEtape);
 		
-		for(int i = 0;i<etapes.size()&&!ok;i++){
-			Etape prec = etapes.get(i);
-			double distPrecNew = graph.getAllShPa().get(prec.getPlace()).get(newEtape).getDistTot();
-			for(int j = 0;i<etapes.size()&&!ok;i++){
-				Etape suiv = etapes.get(j);
-				double distNewSuiv = graph.getAllShPa().get(suiv.getPlace()).get(newEtape).getDistTot();
-				if(distPrecNew!=Double.POSITIVE_INFINITY && distNewSuiv!=Double.POSITIVE_INFINITY){
-					ok = true;
-					if(bestDistTot==-1||distPrecNew + distNewSuiv < bestDistTot){
-						bestPrec = prec;
-						bestDistTot = distPrecNew + distNewSuiv;
+		int indexOfNew = getEtapes().indexOf(new Etape(newEtape, null));
+		if(indexOfNew>-1){
+			getEtapes().set(indexOfNew, new Etape(newEtape, NiveauTemps.TEMPS_MOY));
+			result = this;
+		}else{
+
+			Etape bestPrec = null; // candidat meilleur precedent
+			Etape bestSuiv = null;
+			double bestDistTot = -1;
+			boolean ok = false;
+
+			for(int i = 0;i<etapes.size();i++){
+				Etape prec = etapes.get(i);
+				double distPrecNew = graph.getAllShPa().get(prec.getPlace()).get(newEtape).getDistTot();
+
+				for(int j = i;j<=i+1&&j<etapes.size();j++){
+					Etape suiv = etapes.get(j);
+					double distNewSuiv = graph.getAllShPa().get(suiv.getPlace()).get(newEtape).getDistTot();
+					if(distPrecNew!=Double.POSITIVE_INFINITY && distNewSuiv!=Double.POSITIVE_INFINITY){
+						ok = true;
+						if(bestDistTot==-1||distPrecNew + distNewSuiv < bestDistTot){
+							bestPrec = prec;
+							bestSuiv = suiv;
+							bestDistTot = distPrecNew + distNewSuiv;
+						}
 					}
 				}
-
 			}
-		}
-		if(ok){
-			result = new ITIN(etapes.get(0).getPlace(),etapes.get(0).getNiveauTemps(), etapes.get(etapes.size()-1).getPlace(),etapes.get(etapes.size()-1).getNiveauTemps());
-			for(int i=0; i<etapes.size();i++){
-				result.addEtape(etapes.get(i));
-				if(etapes.get(i)==bestPrec){
-					result.addEtape(newEtape,nivTpsNewEtape);
+			if(ok){
+				/*System.out.println("PCC prec => new");
+				System.out.println(graph.getAllShPa().get(bestPrec.getPlace()).get(newEtape));
+				System.out.println("PCC new => suiv");
+				System.out.println(graph.getAllShPa().get(newEtape).get(bestSuiv.getPlace()));*/
+				//result = new ITIN(etapes.get(0).getPlace(),etapes.get(0).getNiveauTemps(), etapes.get(etapes.size()-1).getPlace(),etapes.get(etapes.size()-1).getNiveauTemps());
+				ArrayList<Etape> resultTmp = new ArrayList<Etape>();
+				for(int i=0; i<etapes.size();i++){
+					resultTmp.add(etapes.get(i));
+					if(etapes.get(i)==bestPrec){
+						ITIN pathPrecToNew = graph.getAllShPa().get(bestPrec.getPlace()).get(newEtape);
+						for(int j = 1; j<pathPrecToNew.getEtapes().size()-1;j++){
+							resultTmp.add(pathPrecToNew.getEtapes().get(j));
+						}
+						resultTmp.add(new Etape(newEtape,NiveauTemps.TEMPS_MOY));
+						ITIN pathNewToSuiv = graph.getAllShPa().get(newEtape).get(bestSuiv.getPlace());
+						for(int j = 1; j<pathNewToSuiv.getEtapes().size()-1;j++){
+							resultTmp.add(pathNewToSuiv.getEtapes().get(j));
+						}
+						if(i<etapes.size()-1&&etapes.get(i+1)!=etapes.get(i)&&bestPrec==bestSuiv){resultTmp.add(new Etape(bestSuiv.getPlace(), NiveauTemps.PAS_DE_VISITE));}
+					}
 				}
+				result = new ITIN(resultTmp.get(0),resultTmp.get(resultTmp.size()-1));
+				for(int i = 1; i < resultTmp.size()-1;i++){result.addEtape(resultTmp.get(i));}
 			}
 		}
-		return ok;
+		
+		return result;
 	}
 
 	public ArrayList<Etape> getEtapes(){
@@ -166,7 +199,6 @@ public class ITIN {
 	public String toString(){
 		String s = "";
 		s = "Pour aller de " + etapes.get(0).getPlace() + " à " + etapes.get(etapes.size()-1).getPlace();
-		System.out.println(etapes.get(0).getPlace().getSommetsAtteignables());
 		if(isPossible()){
 			s+= " il faut passer par : ";
 			for(int i = 1; i<etapes.size()-1;i++){

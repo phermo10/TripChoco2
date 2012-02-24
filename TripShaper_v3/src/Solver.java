@@ -15,12 +15,17 @@ public class Solver {
 	 * @param vitesse En unité de coordonnée par heure (1 unité = 1 mètre ==> equivalent a du Mètre Par Heure, exemple pour 4km/h mettre 4000)
 	 * @param minutesDispo
 	 * @return
+	 * @throws Exception 
 	 */
-	public ITIN computeBestPath(){
-
+	public ITIN computeBestPath() throws Exception{
+		
 		ITIN bestPath = null;
 		Place depart = graph.getUser().getDep();
 		Place arrivee = graph.getUser().getArr();
+		System.out.println(depart);
+		System.out.println(depart.getSommetsAtteignables());
+		System.out.println(arrivee);
+		
 		int secondesDispo = graph.getUser().getTime();
 		double vitesse = graph.getUser().getSpeed();
 		// ----------------------------
@@ -28,9 +33,15 @@ public class Solver {
 		Date t1 = new Date();
 		// Simplification du graphe
 		Graph g = graph.simplify();
-		ITIN shPaToDest = graph.getAllShPa().get(depart).get(arrivee);
-		if(shPaToDest.isPossible()){
-			double vitesseNecessaire = shPaToDest.getDistTot()*graph.coeffDistance()/(secondesDispo);
+		if(depart.equals(arrivee)){
+			bestPath = new ITIN(depart, NiveauTemps.TEMPS_MOY, arrivee, NiveauTemps.TEMPS_MOY);
+		}else{
+			ITIN shPaToDest = graph.getAllShPa().get(depart).get(arrivee);
+			bestPath = shPaToDest;			
+		}
+		
+		if(bestPath.isPossible()){
+			double vitesseNecessaire = bestPath.getDistTot()*graph.coeffDistance()/(secondesDispo);
 			/*System.out.println("Distance totale en pixels entre arrivee et depart : " + graph.getAllShPa().get(depart).get(arrivee).getDistTot());
 			System.out.println("Distance totale reelle entre arrivee et depart : " + graph.getAllShPa().get(depart).get(arrivee).getDistTot()*graph.coeffDistance());
 			System.out.println("Secondes dispo : " + secondesDispo);
@@ -46,41 +57,47 @@ public class Solver {
 				/*System.out.println(depart);
 				System.out.println(depart.getSommetsAtteignables());
 				System.out.println(arrivee);*/
-				bestPath = shPaToDest;
 				//Classement des Places par score décroissant, classement des Places par duree de visite croissante.
 				ArrayList<Place> classementParScore = new ArrayList<Place>(g.getAllplaces());
 				ArrayList<Place> classementParDuree = new ArrayList<Place>(g.getAllplaces());
+				//classementParScore.remove(depart);
+				//classementParDuree.remove(arrivee);
+				
 				ComparateurPlace comparateurScore = new ComparateurPlace(PlaceComparableProperty.SCORE, false, g);
 				ComparateurPlace comparateurDuree = new ComparateurPlace(PlaceComparableProperty.DUREEVISITE, true,g);
 				Collections.sort(classementParScore, comparateurScore);
 				Collections.sort(classementParDuree, comparateurDuree);		
-
 				// Tant qu'il reste des points qui sont potentiellement visitables
 				while(classementParScore.size() > 0){
 					//System.out.println("fglkh");
-
+					//System.out.println("Classement");
+					//System.out.println(classementParScore);
 					// 6) Sélectionner le point ayant le meilleur score
+					//System.out.println("Etape potentielle");
 					Place etapePotentielle = classementParScore.get(0);
-
+					//System.out.println(etapePotentielle);
+					//System.out.println("Best Path");
+					//System.out.println(bestPath);
 					/*System.out.println(vitesse);
 					System.out.println(etapePotentielle.getAverageTime());
 					System.out.println(bestPath.getDureeTot(vitesse,graph.coeffDistance()));
 					System.out.println(secondesDispo);*/
 
 					// 7) Vérifier que la durée minimale de la visite de ce point est inférieure au temps restant
-					if(etapePotentielle.getAverageTime()+bestPath.getDureeTot(vitesse, graph.coeffDistance())>secondesDispo){
+					if(etapePotentielle.getAverageTime()+bestPath.getDureeTot(vitesse, graph.coeffDistance())<secondesDispo){
 						//System.out.println("abcdelkj");
 						//8) Calcul du temps minimal que prendrait un trajet ne visitant que ces points, en utilisant la base des distances précalculées.
-						ITIN newPath = null;
+						ITIN newPath = bestPath.tryToGoBy(etapePotentielle, this.graph);
 						// s'il est possible de passer par cette etape potentielle et que le temps que cela prendrait est inferieur au temps dispo
-						if(bestPath.tryToGoBy(etapePotentielle,NiveauTemps.TEMPS_MOY, newPath, this.graph)){if (newPath.getDureeTot(vitesse,graph.coeffDistance())<=secondesDispo){
-							bestPath = newPath;
-							//System.out.println("True");
-						}}else{
+						if(newPath!=null){
+							if (newPath.getDureeTot(vitesse,graph.coeffDistance())<=secondesDispo){
+								bestPath = newPath;
+								//System.out.println("True");
+							}
+						}else{
 							//System.out.println("False");
 						}
 
-						System.out.println(bestPath);// Dans tous les cas on a vérifié cette option donc on la supprime
 						classementParDuree.remove(etapePotentielle);
 						classementParScore.remove(etapePotentielle);
 					}else{
@@ -104,6 +121,8 @@ public class Solver {
 							}
 						}
 					}
+					//System.out.println("Best path APRES");
+					//System.out.println(bestPath);
 				}
 				System.out.println("OK");
 			}

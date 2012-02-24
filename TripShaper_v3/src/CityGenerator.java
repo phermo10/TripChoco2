@@ -14,8 +14,6 @@ import java.util.Scanner;
 
 public class CityGenerator {
 
-	private static final int minDiameter = 1000;
-	private static final int maxDiameter = 10000;
 	//int nbPoints;
 	private PointsGenerator gen;
 	private ShortestPathsCalculator calc;
@@ -25,8 +23,8 @@ public class CityGenerator {
 		this.calc = new ShortestPathsCalculator(cityID,gen.getPlaces());
 	}
 
-	public CityGenerator(int nbPoints, int nbRegroupements) throws IOException{
-		this.gen = new PointsGenerator(nbPoints, nbRegroupements);
+	public CityGenerator(int totalPoints, int nbZones, int maxPointsInEachZone, int minRealDiameter, int maxRealDiameter) throws IOException{
+		this.gen = new PointsGenerator(totalPoints, nbZones, maxPointsInEachZone, minRealDiameter, maxRealDiameter);
 		this.calc = new ShortestPathsCalculator(gen.getPlaces());
 		saveResult();
 	}
@@ -81,7 +79,8 @@ public class CityGenerator {
 				}
 			}
 		}
-
+		output.flush();
+		output.close();
 	}
 	public int getCityDiameter(){return this.gen.getCityDiameter();}
 	public int getCityID(){return this.gen.cityID;}
@@ -154,14 +153,24 @@ public class CityGenerator {
 			}
 		}
 
-		public PointsGenerator(int nbPoints, int nbPointsRegroupement) throws IOException {
+		/**
+		 * les diamètres reels representent un ordre de grandeur de la taille reelle en metres que l'on souhaite pour la ville
+		 * Plus la taille est grand moins l'utilisateur pourra parcourir de points
+		 * @param totalPoints
+		 * @param nbZones
+		 * @param maxPointsInEachZone
+		 * @param minRealDiameter
+		 * @param maxRealDiameter
+		 * @throws IOException
+		 */
+		public PointsGenerator(int totalPoints, int nbZones, int maxPointsInEachZone, int minRealDiameter, int maxRealDiameter) throws IOException {
 			Random r = new Random();
-			this.cityDiameter = r.nextInt(maxDiameter-minDiameter)+minDiameter; 
+			this.cityDiameter = r.nextInt(maxRealDiameter-minRealDiameter)+minRealDiameter; 
 			System.out.println("diam = " + cityDiameter);
 			this.cityID=((int)(Math.random()*1000));
 			this.delaunay = new Delaunay();
 			this.places = new ArrayList<Place>();
-			generatePlaces(nbPoints);
+			generatePlaces(totalPoints, nbZones, maxPointsInEachZone);
 		}
 
 		public boolean[][] getEdgesMatrix(){
@@ -176,146 +185,59 @@ public class CityGenerator {
 			return this.cityID;
 		}
 
-		private void generatePlaces(int nbPoints){
-			int xPointRegroupement1=0;
-			int yPointRegroupement1=0;
-			int xPointRegroupement2=0;
-			int yPointRegroupement2=0;
-			nbPointsZone1=0;
-			while(nbPointsZone1<3){
-				nbPointsZone1=(int) (Math.random()*10);
-			}
-			nbPointsZone2=0;
-			while(nbPointsZone2<3){
-				nbPointsZone2=(int) (Math.random()*10);
-			}
-			for (int i=0;i<nbPoints;i++){
-				int x=0;
-				int y=0;
-				int whichCase=-1;
-				if (i==0){//first point zone1
-					whichCase=0;
-				}
-				if (i>0&&i<nbPointsZone1-1){//points zone1
-					whichCase=1;
-				}
-				if (i==nbPointsZone1-1){//last point zone1
-					whichCase=2;
-				}
-				if (i==nbPointsZone1){//first point zone2
-					whichCase=3;
-				}
-				if (i>nbPointsZone1&&i<nbPointsZone1+nbPointsZone2-1){//points zone2
-					whichCase=4;
-				}
-				if (i==nbPointsZone1+nbPointsZone2-1){//last point zone2
-					whichCase=5;
-				}
-				switch(whichCase){
-				case 0 :
-					xPointRegroupement1=((int)((Display1.xWindow*Math.random()) ));
-					yPointRegroupement1=((int)((Display1.yWindow*Math.random()) ));
-					x=xPointRegroupement1;
-					y=yPointRegroupement1;
-					break;
-				case 1:
-					if (Math.random()>0.5){
-						x=xPointRegroupement1+((int)(Display1.tailleZoneRegroupement*Math.random()));
-					}
-					else{
-						x=xPointRegroupement1-((int)(Display1.tailleZoneRegroupement*Math.random()));
-					}
-					if (Math.random()>0.5){
-						y=yPointRegroupement1+((int)(Display1.tailleZoneRegroupement*Math.random()));
-					}
-					else{
-						y=yPointRegroupement1-((int)(Display1.tailleZoneRegroupement*Math.random()));
-					}
-					//zone1.add(new Point(x,y));
-					break;
-				case 2:
-					if (Math.random()>0.5){
-						x=xPointRegroupement1+((int)(Display1.tailleZoneRegroupement*Math.random()));
-					}
-					else{
-						x=xPointRegroupement1-((int)(Display1.tailleZoneRegroupement*Math.random()));
-					}
-					if (Math.random()>0.5){
-						y=yPointRegroupement1+((int)(Display1.tailleZoneRegroupement*Math.random()));
-					}
-					else{
-						y=yPointRegroupement1-((int)(Display1.tailleZoneRegroupement*Math.random()));
-					}
-					//zone1.add(new Point(x,y));
-					//zonesRegroupement.add(zone1);
-					break;
-				case 3:
-					boolean xOK=false;
-					while (xOK==false){
-						xPointRegroupement2=(((int)(Display1.xWindow*Math.random()) ));
-						if (Math.abs(xPointRegroupement2-xPointRegroupement1)>Display1.distanceBetweenPointAndZone){
-							xOK=true;
+		private void generatePlaces(int totalPoints, int nbZones, int maxPointsInEachZone){
+			ArrayList<Point> zoneCenter = new ArrayList<Point>();
+			//nbPointsRegroupement has to inferior to totalPoints/maxPointsInEachZone
+			int nbPointsAlreadyCreated=0;
+			for (int i=0;i<nbZones;i++){
+				//boolean zoneCenterFarFromTheOthers=false;
+				int xZoneCenter=0;
+				int yZoneCenter=0;
+				//int nbTentatives=0;
+				//while (!zoneCenterFarFromTheOthers&&nbTentatives<50){
+				//	nbTentatives++;
+				xZoneCenter=((int)((Display1.xWindow*Math.random()) ));
+				yZoneCenter=((int)((Display1.yWindow*Math.random()) ));
+				//	Point tempZoneCenter=new Point(xZoneCenter,yZoneCenter);
+				/*for (Point p: zoneCenter){
+						if (p.distance(tempZoneCenter)>Display1.distanceBetweenPointAndZone){
+							zoneCenterFarFromTheOthers=true;
 						}
-					}
-					boolean yOK=false;
-					while (yOK==false){
-						yPointRegroupement2=(((int)(Display1.yWindow*Math.random()) ));
-						if (Math.abs(yPointRegroupement2-yPointRegroupement1)>Display1.distanceBetweenPointAndZone){
-							yOK=true;
+						else{
+							zoneCenterFarFromTheOthers=false;
 						}
-					}
-					x=xPointRegroupement2;
-					y=yPointRegroupement2;
-					//zone2.add(new Point(x,y));
-					//centresZonesRegroupement.add(new Point(x,y));
-					break;
-				case 4:
-					if (Math.random()>0.5){
-						x=xPointRegroupement2+((int)(Display1.tailleZoneRegroupement*Math.random()));
-					}
-					else{
-						x=xPointRegroupement2-((int)(Display1.tailleZoneRegroupement*Math.random()));
-					}
-					if (Math.random()>0.5){
-						y=yPointRegroupement2+((int)(Display1.tailleZoneRegroupement*Math.random()));
-					}
-					else{
-						y=yPointRegroupement2-((int)(Display1.tailleZoneRegroupement*Math.random()));
-					}
-					//zone2.add(new Point(x,y));
-					break;
-				case 5:
-					if (Math.random()>0.5){
-						x=xPointRegroupement2+((int)(Display1.tailleZoneRegroupement*Math.random()));
-					}
-					else{
-						x=xPointRegroupement2-((int)(Display1.tailleZoneRegroupement*Math.random()));
-					}
-					if (Math.random()>0.5){
-						y=yPointRegroupement2+((int)(Display1.tailleZoneRegroupement*Math.random()));
-					}
-					else{
-						y=yPointRegroupement2-((int)(Display1.tailleZoneRegroupement*Math.random()));
-					}
-					//zone2.add(new Point(x,y));
-					//zonesRegroupement.add(zone2);
-					break;
-				default :
-					boolean xOK2=false;
-				while (xOK2==false){
-					x=((int)((Display1.xWindow*Math.random()) ));
-					if ((Math.abs(x-xPointRegroupement1)>Display1.distanceBetweenPointAndZone)&&(Math.abs(x-xPointRegroupement2)>Display1.distanceBetweenPointAndZone)){
-						xOK2=true;
-					}
+					}*/
+				//}
+				int nbPointsInThisZone=0;
+				while(nbPointsInThisZone<3){
+					nbPointsInThisZone=(int) (Math.random()*10);
 				}
-				boolean yOK2=false;
-				while (yOK2==false){
-					y=((int)((Display1.yWindow*Math.random()) ));
-					if ((Math.abs(y-yPointRegroupement1)>Display1.distanceBetweenPointAndZone)&&(Math.abs(y-yPointRegroupement2)>Display1.distanceBetweenPointAndZone)){
-						yOK2=true;
+				zoneCenter.add(new Point(xZoneCenter,yZoneCenter));
+				places.add(new Place(new Point(xZoneCenter,yZoneCenter), (int)(minAverageTime+Math.random()*(maxAverageTime-minAverageTime))));
+				delaunay.insertPoint(new Point(xZoneCenter,yZoneCenter));
+				nbPointsAlreadyCreated++;
+				for (int j=0;j<nbPointsInThisZone;j++){
+					int x=0;int y=0;
+					if (Math.random()>0.5){
+						x=xZoneCenter+((int)(Display1.tailleZoneRegroupement*Math.random()));
 					}
+					else{
+						x=xZoneCenter-((int)(Display1.tailleZoneRegroupement*Math.random()));
+					}
+					if (Math.random()>0.5){
+						y=yZoneCenter+((int)(Display1.tailleZoneRegroupement*Math.random()));
+					}
+					else{
+						y=yZoneCenter-((int)(Display1.tailleZoneRegroupement*Math.random()));
+					}		
+					places.add(new Place(new Point(x,y), (int)(minAverageTime+Math.random()*(maxAverageTime-minAverageTime))));
+					delaunay.insertPoint(new Point(x,y));
+					nbPointsAlreadyCreated++;
 				}
-				}
+			}
+			for (int i=0;i<totalPoints-nbPointsAlreadyCreated;i++){
+				int x=((int)((Display1.xWindow*Math.random()) ));
+				int y=((int)((Display1.yWindow*Math.random()) ));
 				places.add(new Place(new Point(x,y), (int)(minAverageTime+Math.random()*(maxAverageTime-minAverageTime))));
 				delaunay.insertPoint(new Point(x,y));
 			}
@@ -338,16 +260,16 @@ public class CityGenerator {
 				edgesMatrix[j][i]=true;
 			}
 			// looking for a path between the two zones
-			boolean pathBetweenZones=false;
+			/*boolean pathBetweenZones=false;
 			for (int i=nbPointsZone1;i<nbPointsZone1+nbPointsZone2;i++){ 
 				for (int j=0;j<nbPointsZone1;j++){
 					if (edgesMatrix[i][j]==true){
 						pathBetweenZones=true;
 					}
 				}
-			}
+			}*/
 			//creating one path between the two zones
-			if (pathBetweenZones==true){ 
+			/*if (pathBetweenZones==true){ 
 				for (int i=nbPointsZone1;i<nbPointsZone1+nbPointsZone2;i++){ 
 					for (int j=0;j<nbPointsZone1;j++){
 						edgesMatrix[i][j]=false;
@@ -358,9 +280,9 @@ public class CityGenerator {
 				int j=(int) (Math.random()*(nbPointsZone1-1));
 				edgesMatrix[i][j]=true;
 				edgesMatrix[j][i]=true;
-			}
+			}*/
 			//creating only one path between a point and zone 1
-			for (int i=nbPointsZone1+nbPointsZone2;i<places.size();i++){
+			/*for (int i=nbPointsZone1+nbPointsZone2;i<places.size();i++){
 				int indexPath=-1;
 				for (int j=0;j<nbPointsZone1;j++){
 					if (edgesMatrix[i][j]==true){
@@ -376,9 +298,9 @@ public class CityGenerator {
 					edgesMatrix[i][indexPath]=true;
 					edgesMatrix[indexPath][i]=true;
 				}
-			}
+			}*/
 			//creating only one path between a point and zone 2
-			for (int i=nbPointsZone1+nbPointsZone2;i<places.size();i++){
+			/*for (int i=nbPointsZone1+nbPointsZone2;i<places.size();i++){
 				int indexPath=-1;
 				for (int j=nbPointsZone1;j<nbPointsZone1+nbPointsZone2;j++){
 					if (edgesMatrix[i][j]==true){
@@ -389,13 +311,13 @@ public class CityGenerator {
 					for (int j=nbPointsZone1;j<nbPointsZone1+nbPointsZone2;j++){
 						edgesMatrix[i][j]=false;
 						edgesMatrix[j][i]=false;
-					}
-					/*int a=(int) (20+Math.random()*(nbPoints-21));
+					}*/
+			/*int a=(int) (20+Math.random()*(nbPoints-21));
 					int b=(int) (10+Math.random()*9);*/
-					edgesMatrix[i][indexPath]=true;
+			/*edgesMatrix[i][indexPath]=true;
 					edgesMatrix[indexPath][i]=true;
 				}
-			}
+			}*/
 
 
 
