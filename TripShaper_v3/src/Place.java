@@ -1,6 +1,5 @@
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 
 
@@ -58,5 +57,13 @@ public class Place {
 	}
 	public int hashCode(){
 		return 3*getPosition().hashCode();
+	}
+	
+	public ArrayList<Place> getSommetsAtteignables(){
+		ArrayList<Place> satt = new ArrayList<Place>();
+		for(Path p : getPathsFromThisPlace()){
+			satt.add(p.end1.equals(this)?p.end2:p.end1);
+		}
+		return satt;
 	}
 }

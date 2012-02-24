@@ -1,7 +1,4 @@
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 
 public class ITIN {
 	private ArrayList<Etape> etapes;
@@ -84,12 +81,12 @@ public class ITIN {
 	 * @param vitesse
 	 * @return
 	 */
-	public double getDureeTot(int vitesse){
+	public double getDureeTot(double vitesse, double coeffDistance){
 		double dureeDesEtapes = 0;
 		dureeDesEtapes+=etapes.get(0).getPlace().getAverageTime();
 		Etape e = etapes.get(0);
 		for(int i = 1;i<etapes.size();i++){
-			dureeDesEtapes+=e.getPlace().getPosition().distance(etapes.get(i).getPlace().getPosition())/vitesse;
+			dureeDesEtapes+=e.getPlace().getPosition().distance(etapes.get(i).getPlace().getPosition())*coeffDistance/vitesse;
 			dureeDesEtapes+=etapes.get(i).getPlace().getAverageTime();
 			e = etapes.get(i);
 		}
@@ -103,15 +100,17 @@ public class ITIN {
 	}
 
 	/**
-	 * Retourne un itineraire de this.depart à newArrivee passant par toutes les etapes de this 
+	 * Retourne un itineraire de this.depart à newArrivee passant par toutes les etapes de this
+	 * Eventuellement, on modifie le temps de visite de l'ancienne derniere etape 
 	 * @param newArrivee
 	 * @return
 	 */
-	public ITIN prolonger(Place newArrivee, NiveauTemps nivTpsNewArr){
+	public ITIN prolonger(Place newArrivee, NiveauTemps nivTpsNewArr, NiveauTemps nivTpsOldArr){
 		ITIN clone = new ITIN(etapes.get(0).getPlace(),etapes.get(0).getNiveauTemps(), newArrivee, nivTpsNewArr);
-		for(Etape e : etapes){
-			clone.addEtape(e);
+		for(int i=0;i<etapes.size()-1;i++){
+			clone.addEtape(etapes.get(i));
 		}	
+		clone.addEtape(new Etape(etapes.get(etapes.size()-1).getPlace(), nivTpsOldArr));
 		return clone;
 	}
 
@@ -127,18 +126,15 @@ public class ITIN {
 	 * @return
 	 */
 	public boolean tryToGoBy(Place newEtape, NiveauTemps nivTpsNewEtape, ITIN result, Graph graph){
-		int newEtapeIndex = graph.getAllplaces().indexOf(newEtape);
 		boolean ok = false;
 		Etape bestPrec = null; // candidat meilleur precedent
 		double bestDistTot = -1;
 		for(int i = 0;i<etapes.size()&&!ok;i++){
 			Etape prec = etapes.get(i);
-			int precIndex = graph.getAllplaces().indexOf(prec.getPlace());
 			for(int j = 0;i<etapes.size()&&!ok;i++){
 				Etape suiv = etapes.get(j);
-				int suivIndex = graph.getAllplaces().indexOf(suiv.getPlace());
-				double distPrecNew = graph.getTousPCC().get(precIndex).get(newEtape).getDistTot();
-				double distNewSuiv = graph.getTousPCC().get(suivIndex).get(newEtape).getDistTot();
+				double distPrecNew = graph.getAllShPa().get(prec.getPlace()).get(newEtape).getDistTot();
+				double distNewSuiv = graph.getAllShPa().get(suiv.getPlace()).get(newEtape).getDistTot();
 				if(distPrecNew!=Double.POSITIVE_INFINITY && distNewSuiv!=Double.POSITIVE_INFINITY){
 					ok = true;
 					if(distPrecNew + distNewSuiv < bestDistTot){
@@ -167,11 +163,12 @@ public class ITIN {
 
 	public String toString(){
 		String s = "";
-		s = "Pour aller de " + etapes.get(0).getPlace() + " à " + etapes.get(0).getPlace();
+		s = "Pour aller de " + etapes.get(0).getPlace() + " à " + etapes.get(etapes.size()-1).getPlace();
+		System.out.println(etapes.get(0).getPlace().getSommetsAtteignables());
 		if(isPossible()){
 			s+= " il faut passer par : ";
-			for(Etape e : etapes){
-				s+="\n" + e.getPlace(); 
+			for(int i = 1; i<etapes.size()-1;i++){
+				s+="\n" + etapes.get(i).getPlace(); 
 			}
 			s+="\nDistance à vol d'oiseau : " + etapes.get(0).getPlace().getPosition().distance(etapes.get(etapes.size()-1).getPlace().getPosition());
 		}

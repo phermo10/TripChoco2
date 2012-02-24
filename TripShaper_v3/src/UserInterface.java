@@ -41,9 +41,9 @@ public interface UserInterface {
 	
 	/**
 	 * 
-	 * @return the speed of the user (in m/h)
+	 * @return the speed of the user (in m/s)
 	 */
-	public int getSpeed();
+	public double getSpeed();
 	
 	/**
 	 * Sets the speed of the user
@@ -53,7 +53,7 @@ public interface UserInterface {
 	
 	/**
 	 * 
-	 * @return the time the user has for his visit
+	 * @return the time the user has for his visit (in seconds)
 	 */
 	public int getTime();
 	

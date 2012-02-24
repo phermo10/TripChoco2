@@ -26,9 +26,9 @@ public class UserGenerator {
 		int id = generator.nextInt(maxID);
 		Place dep = allplaces.get(generator.nextInt(allplaces.size() - 1));
 		Place arr = allplaces.get(generator.nextInt(allplaces.size() - 1));
-		return new User(id,4000,180,dep,arr);
-		
+		return new User(id,1.11,10800,dep,arr); // 1.11 m/s = 4 km/h ; 10800 sec = 180 minutes = 3h
 	}
+	
 	public static HashMap<Place,Integer> generateRandomScores(ArrayList<Place> myPlaces){
 		
 		HashMap<Place,Integer> scoresmap = new HashMap<Place,Integer>();

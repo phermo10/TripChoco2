@@ -1,7 +1,3 @@
-import java.awt.Point;
-import java.util.ArrayList;
-
-
 public class Path implements PathInterface {
 	Place end1;
 	Place end2;

@@ -1,25 +1,16 @@
 import java.awt.Dimension;
 import java.awt.Point;
-import java.awt.Window;
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Scanner;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 
 
@@ -34,7 +25,7 @@ public class Graph implements GraphInterface,Serializable {
 	//public final static int zone_time = 2;
 
 	private ArrayList<Place> allplaces;
-	private ArrayList<HashMap<Place,ITIN>> pccITIN;
+	private HashMap<Place,HashMap<Place,ITIN>> allShPa;
 
 	//private HashMap<Integer,Place> placesID;
 
@@ -56,12 +47,18 @@ public class Graph implements GraphInterface,Serializable {
 	
 	private int cityID;
 	
+	/**
+	 * diametre de la ville en kilometre
+	 */
+	private int cityDiameter;
+	
 	
 	public Graph(int userID, int cityID) throws IOException{
 		this.cityID = cityID;
 		CityGenerator citygen = new CityGenerator(cityID);
+		this.cityDiameter = citygen.getCityDiameter();
 		this.allplaces = citygen.getPlaces();
-		this.pccITIN = citygen.getPCC();
+		this.allShPa = citygen.getTousPCC();
 		//Now we have to put scores and times on both places and paths
 		String filename = Emplacements.FICHIER_USER_COMPLET(cityID, userID);
 		Scanner reader = new Scanner(new File (filename));
@@ -74,7 +71,7 @@ public class Graph implements GraphInterface,Serializable {
 		int arrX = Integer.parseInt(reader.nextLine());
 		int arrY = Integer.parseInt(reader.nextLine());
 		Place depTmp = new Place(new Point(depX,depY), -1);
-		Place arrTmp = new Place(new Point(depX,depY), -1);
+		Place arrTmp = new Place(new Point(arrX,arrY), -1);
 		int indexDep = this.allplaces.indexOf(depTmp);
 		int indexArr = this.allplaces.indexOf(arrTmp);
 		this.user = new User(userId,new ArrayList<Tag>(), false, speed, time, allplaces.get(indexDep) , allplaces.get(indexArr), new ArrayList<Place>());
@@ -83,7 +80,7 @@ public class Graph implements GraphInterface,Serializable {
 		reader.nextLine(); // <Places>
 		int placeIndex = 0;
 		while((toRead=reader.nextLine())!="</Places>"){
-			int pScore = Integer.parseInt(reader.nextLine());
+			int pScore = Integer.parseInt(toRead);
 			scores.put(this.allplaces.get(placeIndex), pScore);
 			placeIndex++;
 		}
@@ -91,8 +88,9 @@ public class Graph implements GraphInterface,Serializable {
 		reader.close();
 		
 	}
-	public Graph(ArrayList<HashMap<Place,ITIN>> pccITIN, ArrayList<Place> allplaces, ArrayList<Tag> alltags, User user, HashMap<Place,Integer> scores, int cityID){
-		this.pccITIN = pccITIN;
+	public Graph(HashMap<Place,HashMap<Place,ITIN>> allShPa, ArrayList<Place> allplaces, ArrayList<Tag> alltags, User user, HashMap<Place,Integer> scores, int cityID, int cityDiameter){
+		this.cityDiameter = cityDiameter;
+		this.allShPa = allShPa;
 		this.cityID = cityID;
 		this.bestPath = null;
 		this.allplaces = allplaces;
@@ -111,8 +109,8 @@ public class Graph implements GraphInterface,Serializable {
 		return alltags;
 	}
 
-	public ArrayList<HashMap<Place,ITIN>> getTousPCC(){
-		return this.pccITIN;
+	public HashMap<Place,HashMap<Place,ITIN>> getAllShPa(){
+		return this.allShPa;
 	}
 	
 	
@@ -146,20 +144,18 @@ public class Graph implements GraphInterface,Serializable {
 	}
 
 	public Graph simplify() {
-		ArrayList<Place> places = new ArrayList<Place>();
+		return this;
+		/*ArrayList<Place> places = new ArrayList<Place>();
 		// Tri par rayon parcourable
-		double distanceMaxParcourable = this.getUser().getSpeed()*60 * this.getUser().getTime();
-		System.out.println(distanceMaxParcourable);
+		double rayonMaxParcourable = this.getUser().getSpeed() * this.getUser().getTime() / 2;
+		System.out.println("Rayon max parcourable " + rayonMaxParcourable);
 		for(Place pl : this.getAllplaces()){
-			if(this.getUser().getDep().getPosition().distance(pl.getPosition())<distanceMaxParcourable/2){
+			if(this.getUser().getDep().getPosition().distance(pl.getPosition())*coeffDistance()<rayonMaxParcourable){
 				places.add(pl);
-				/*for(ARRET a : s.getListeArrets()){
-					TRANSPORT t = a.getTransport();
-					if(!transports.contains(t)){transports.add(t);}
-				}*/
+				System.out.println("Add " + pl);
 			}
 		}
-		return new Graph(pccITIN, places,this.getAlltags(),this.getUser(),this.getScores(),this.cityID);
+		return new Graph(allShPa, places,this.getAlltags(),this.getUser(),this.getScores(),this.cityID,this.cityDiameter);*/
 	}
 
 	public HashMap<Place, Integer> getScores() {
@@ -178,6 +174,10 @@ public class Graph implements GraphInterface,Serializable {
 
 
 	public void save() throws IOException {
+		File dir = new File(Emplacements.DOSSIER_GRAPH_COMPLET(this.cityID));
+		dir.mkdirs();
+		File f = new File(Emplacements.FICHIER_USER_COMPLET(this.cityID,this.getUser().getId()));
+		f.createNewFile();
 		PrintWriter writer =  new PrintWriter(new BufferedWriter
 				(new FileWriter(Emplacements.FICHIER_USER_COMPLET(this.cityID,this.getUser().getId()))));
 		writer.println("<User>");
@@ -204,12 +204,10 @@ public class Graph implements GraphInterface,Serializable {
 
 		frame.setSize(new Dimension(xWindow+50,yWindow+50)); 
 
-		ArrayList<Place> allplaces = this.getAllplaces();
-		for (Place p : allplaces) {
-			System.out.println(p);
-		}
-
-		MonCompo compo = new MonCompo(this.getAllplaces());
+		MonCompo compo;
+		if(this.bestPath!=null){
+		compo = new MonCompo(this,bestPath);}
+		else{compo = new MonCompo(this);}
 		frame.add(compo); 
 		frame.setVisible(true);
 	}
@@ -222,6 +220,8 @@ public class Graph implements GraphInterface,Serializable {
 		this.allplaces = allplaces;
 	}
 
-
+	public double coeffDistance(){
+		return cityDiameter/Math.min(Display1.xWindow, Display1.yWindow);
+	}
 
 }

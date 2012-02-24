@@ -128,22 +128,22 @@ public class Display1 {
 		//FAIRE UN GETTER DANS CITYGENERATOR
 		User user = UserGenerator.generateBasicUser(city.getPlaces());
 		HashMap<Place,Integer> scores = UserGenerator.generateRandomScores(city.getPlaces());
-		Graph userGraph = new Graph(city.getPCC(),city.getPlaces(), new ArrayList<Tag>(), user,scores, city.getID());
+		Graph userGraph = new Graph(city.getTousPCC(),city.getPlaces(), new ArrayList<Tag>(), user,scores, city.getCityID(),city.getCityDiameter());
 		userGraph.save();
 		userGraph.display();
 		System.out.println("Graphe et user générés et sauvegardés");
 		System.out.println("Calcul du meilleur chemin le plus fun avec des trucs cools...");
-		for(Place p : userGraph.getAllplaces()){
+		/*for(Place p : userGraph.getAllplaces()){
 			System.out.println(p.hashCode());
-		}
-		System.out.println("------------------------------------------------------");
-		System.out.println(userGraph.getTousPCC().size());
-		for(int i = 0; i<userGraph.getTousPCC().size();i++){
-			System.out.println( userGraph.getTousPCC().get(i).keySet().size());
-			for(Place p : userGraph.getTousPCC().get(i).keySet()){
+		}*/
+		/*System.out.println("------------------------------------------------------");
+		System.out.println(userGraph.getAllShPa().size());
+		for(int i = 0; i<userGraph.getAllShPa().size();i++){
+			System.out.println( userGraph.getAllShPa().get(i).keySet().size());
+			for(Place p : userGraph.getAllShPa().get(i).keySet()){
 				System.out.println(p.hashCode());
 			}
-		}
+		}*/
 		userGraph.solve();
 		userGraph.display();
 	} 

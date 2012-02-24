@@ -1,12 +1,4 @@
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Random;
-import java.util.Scanner;
 
 
 public class User implements UserInterface {
@@ -17,7 +9,7 @@ public class User implements UserInterface {
 	
 	private boolean disabled;
 	
-	private int speed;
+	private double speed;
 	
 	private int time;
 	
@@ -26,11 +18,8 @@ public class User implements UserInterface {
 	private Place arr;
 	
 	private ArrayList<Place> inter;
-	
-	private ITIN dernierItinCalcule;
-	
-	public User (int id, ArrayList<Tag> userranking, boolean disabled, int speed, int time, Place dep, Place arr, ArrayList<Place> inter ) {
-		this.dernierItinCalcule = null;
+		
+	public User (int id, ArrayList<Tag> userranking, boolean disabled, double speed, int time, Place dep, Place arr, ArrayList<Place> inter ) {
 		this.id = id;
 		this.userranking = userranking;
 		this.disabled = disabled;
@@ -46,7 +35,7 @@ public class User implements UserInterface {
 		this (id,userranking,false,5,time,dep,arr,new ArrayList<Place>());
 	}
 	
-	public User (int id, int speed, int time, Place dep, Place arr){
+	public User (int id, double speed, int time, Place dep, Place arr){
 		this (id,new ArrayList<Tag> (), false, speed, time, dep, arr, null);
 	}
 
@@ -80,8 +69,8 @@ public class User implements UserInterface {
 	public void setDisabled(boolean disabled) {
 		this.disabled = disabled;
 	}
-
-	public int getSpeed() {
+	
+	public double getSpeed() {
 		return speed;
 	}
 
