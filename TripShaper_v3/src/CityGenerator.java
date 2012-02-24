@@ -28,9 +28,10 @@ public class CityGenerator {
 	public CityGenerator(int nbPoints, int nbRegroupements) throws IOException{
 		this.gen = new PointsGenerator(nbPoints, nbRegroupements);
 		this.calc = new ShortestPathsCalculator(gen.getPlaces());
+		saveResult();
 	}
 
-	public void saveResult() throws IOException{
+	private void saveResult() throws IOException{
 		File dir = new File (Emplacements.DOSSIER_GRAPH_COMPLET(gen.getID()));
 		dir.mkdirs();
 		PrintWriter writer =  new PrintWriter(new BufferedWriter
