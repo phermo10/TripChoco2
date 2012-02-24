@@ -10,7 +10,7 @@ public class Tests {
 			/*Graph mygraph = new Graph(30);
 			mygraph.setUser(new User(2012,4000,180,mygraph.getAllplaces().get(0),mygraph.getAllplaces().get(0)));
 			mygraph.save();*/
-			Graph camarche = Graph.restore(2012,"graph115");
+			Graph camarche = Graph.restore(2012,115);
 			camarche.save();
 			
 			
