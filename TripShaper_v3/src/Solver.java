@@ -28,16 +28,8 @@ public class Solver {
 		Date t1 = new Date();
 		// Simplification du graphe
 		Graph g = graph.simplify();
-
-		//simplifyGraph(depart, vitesse, minutesDispo, graph);
-		Date t2 = new Date();
-		System.out.println("Durée : " + (t2.getTime() - t1.getTime()) + "ms");
-		//	----------------------------
-
-
-		System.out.println("Recherche du meilleur chemin");
 		ITIN shPaToDest = graph.getAllShPa().get(depart).get(arrivee);
-		if(shPaToDest!=null){
+		if(shPaToDest.isPossible()){
 			double vitesseNecessaire = shPaToDest.getDistTot()*graph.coeffDistance()/(secondesDispo);
 			/*System.out.println("Distance totale en pixels entre arrivee et depart : " + graph.getAllShPa().get(depart).get(arrivee).getDistTot());
 			System.out.println("Distance totale reelle entre arrivee et depart : " + graph.getAllShPa().get(depart).get(arrivee).getDistTot()*graph.coeffDistance());
@@ -54,7 +46,7 @@ public class Solver {
 				/*System.out.println(depart);
 				System.out.println(depart.getSommetsAtteignables());
 				System.out.println(arrivee);*/
-				bestPath = new ITIN(depart,NiveauTemps.TEMPS_MOY, arrivee,NiveauTemps.TEMPS_MOY);
+				bestPath = shPaToDest;
 				//Classement des Places par score décroissant, classement des Places par duree de visite croissante.
 				ArrayList<Place> classementParScore = new ArrayList<Place>(g.getAllplaces());
 				ArrayList<Place> classementParDuree = new ArrayList<Place>(g.getAllplaces());
@@ -119,6 +111,7 @@ public class Solver {
 		//Date t4 = new Date();
 		//System.out.println("Durée : " + (t4.getTime() - t3.getTime()) + "ms");
 		//bestPath.ordonnerEtapes();
+		System.out.println(bestPath);
 		return bestPath;
 	}
 

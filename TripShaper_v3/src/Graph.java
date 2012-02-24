@@ -144,8 +144,7 @@ public class Graph implements GraphInterface,Serializable {
 	}
 
 	public Graph simplify() {
-		return this;
-		/*ArrayList<Place> places = new ArrayList<Place>();
+		ArrayList<Place> places = new ArrayList<Place>();
 		// Tri par rayon parcourable
 		double rayonMaxParcourable = this.getUser().getSpeed() * this.getUser().getTime() / 2;
 		System.out.println("Rayon max parcourable " + rayonMaxParcourable);
@@ -155,7 +154,7 @@ public class Graph implements GraphInterface,Serializable {
 				System.out.println("Add " + pl);
 			}
 		}
-		return new Graph(allShPa, places,this.getAlltags(),this.getUser(),this.getScores(),this.cityID,this.cityDiameter);*/
+		return new Graph(allShPa, places,this.getAlltags(),this.getUser(),this.getScores(),this.cityID,this.cityDiameter);
 	}
 
 	public HashMap<Place, Integer> getScores() {

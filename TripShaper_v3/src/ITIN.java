@@ -139,7 +139,7 @@ public class ITIN {
 				double distNewSuiv = graph.getAllShPa().get(suiv.getPlace()).get(newEtape).getDistTot();
 				if(distPrecNew!=Double.POSITIVE_INFINITY && distNewSuiv!=Double.POSITIVE_INFINITY){
 					ok = true;
-					if(distPrecNew + distNewSuiv < bestDistTot){
+					if(bestDistTot==-1||distPrecNew + distNewSuiv < bestDistTot){
 						bestPrec = prec;
 						bestDistTot = distPrecNew + distNewSuiv;
 					}

@@ -14,8 +14,8 @@ import java.util.Scanner;
 
 public class CityGenerator {
 
-	private static final int minDiameter = 5000;
-	private static final int maxDiameter = 60000;
+	private static final int minDiameter = 1000;
+	private static final int maxDiameter = 10000;
 	//int nbPoints;
 	private PointsGenerator gen;
 	private ShortestPathsCalculator calc;
@@ -426,7 +426,9 @@ public class CityGenerator {
 				for(int j = 0 ; j<places.size();j++){
 					if(i!=j){
 						distances.put(places.get(j),Double.POSITIVE_INFINITY);
-						plusCourtsChemins.put(places.get(j), null);
+						ITIN it = new ITIN(depart, NiveauTemps.TEMPS_MOY, places.get(j), NiveauTemps.TEMPS_MOY);
+						it.makeImpossible();
+						plusCourtsChemins.put(places.get(j), it);
 					}
 				}
 				distances.put(depart, 0.0);
@@ -451,8 +453,7 @@ public class CityGenerator {
 								ITIN shortestToPrec = plusCourtsChemins.get(prec);
 								ITIN shortestToPP;
 								if(shortestToPrec!=null){
-									shortestToPP = shortestToPrec;
-									shortestToPP.prolonger(pp,NiveauTemps.TEMPS_MOY, NiveauTemps.PAS_DE_VISITE);
+									shortestToPP = shortestToPrec.prolonger(pp,NiveauTemps.TEMPS_MOY, NiveauTemps.PAS_DE_VISITE);
 								}
 								else{
 									shortestToPP = new ITIN(depart, NiveauTemps.TEMPS_MOY, pp, NiveauTemps.TEMPS_MOY);
