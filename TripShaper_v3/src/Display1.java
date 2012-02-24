@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.io.File;
 
 import javax.sound.midi.SysexMessage;
@@ -41,7 +42,7 @@ public class Display1 {
 		frame.setVisible(true);
 		mygraph.save();
 		System.out.println("End of writing");*/
-
+		/*
 		Graph userGraph=null;
 		File dossierSavings = new File(Emplacements.DOSSIER_SAVINGS);
 		File villes[]=null;
@@ -75,14 +76,14 @@ public class Display1 {
 							System.out.println("Veuillez entrer l'ID du user à utiliser");
 							input = lireString();
 							int id = Integer.parseInt(input);
-							userGraph = Graph.restore(id,cityID);
+							userGraph = new Graph(id,cityID);
 							newUser=false;
 						}else{
 							newUser = true;							
 						}						
 					}
 				}else{
-					
+
 					System.out.println("Erreur");
 					System.exit(0);
 				}
@@ -98,9 +99,17 @@ public class Display1 {
 			int n;
 			try{n=Integer.parseInt(input);}catch(Exception e){n=-1;}
 			if(n>-1){
-				userGraph = new Graph(n);
-				User user = new User (2012,4000,180,userGraph.getAllplaces().get(0),userGraph.getAllplaces().get(0));
-				userGraph.setUser(user);
+				//userGraph = new Graph(n);
+				//User user = new User (2012,4000,180,userGraph.getAllplaces().get(0),userGraph.getAllplaces().get(0));
+				CityGenerator city = new CityGenerator(n,2);
+				//FAIRE UN GETTER DANS CITYGENERATOR
+				Place[] allplaces = city.getPlaces();
+				User user = UserGenerator.generateBasicUser(allplaces);
+				HashMap<Place,Integer> scores = UserGenerator.generateRandomScores(allplaces);
+
+				userGraph = new Graph(allplaces, new ArrayList<Tag>(), user,scores, city.getID());
+
+				//userGraph.setUser(user);
 				userGraph.save();
 				System.out.println("Graphe et user générés et sauvegardés");
 			}else{
@@ -113,7 +122,30 @@ public class Display1 {
 		//ITIN bestPath = userGraph.solve();
 		userGraph.solve();
 		userGraph.display();
-		// Afficher l'itineraire calculer
+		// Afficher l'itineraire calculer*/
+
+		CityGenerator city = new CityGenerator(30,2);
+		//FAIRE UN GETTER DANS CITYGENERATOR
+		User user = UserGenerator.generateBasicUser(city.getPlaces());
+		HashMap<Place,Integer> scores = UserGenerator.generateRandomScores(city.getPlaces());
+		Graph userGraph = new Graph(city.getPCC(),city.getPlaces(), new ArrayList<Tag>(), user,scores, city.getID());
+		userGraph.save();
+		userGraph.display();
+		System.out.println("Graphe et user générés et sauvegardés");
+		System.out.println("Calcul du meilleur chemin le plus fun avec des trucs cools...");
+		for(Place p : userGraph.getAllplaces()){
+			System.out.println(p.hashCode());
+		}
+		System.out.println("------------------------------------------------------");
+		System.out.println(userGraph.getTousPCC().size());
+		for(int i = 0; i<userGraph.getTousPCC().size();i++){
+			System.out.println( userGraph.getTousPCC().get(i).keySet().size());
+			for(Place p : userGraph.getTousPCC().get(i).keySet()){
+				System.out.println(p.hashCode());
+			}
+		}
+		userGraph.solve();
+		userGraph.display();
 	} 
 
 	private static String lireString(){

@@ -10,7 +10,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.*;
+
 import javax.swing.JOptionPane;
+
 
 public class Solver {
 
@@ -20,64 +22,13 @@ public class Solver {
 	private final int dureeMaxDesVisites = 50; //minutes
 	private ITIN best;
 	private Graph graph;
-	
-	public Solver(/*String emplacementArretId,*/ Graph graph){
+
+	public Solver(Graph graph){
 		this.graph = graph;
-		/*
-		System.out.println("Calcul du score max :");
-		Date t1 = new Date();
-		//maxScore = computeMaxScore(graph.getNbNoeuds());
-		this.maxScore = graph.getAllplaces().get(0).scoreMax();
-		Date t2 = new Date();
-		System.out.println("Scoremax = " + maxScore);
-		System.out.println("Durée : " + (t2.getTime() - t1.getTime()) + "ms");
-		/*System.out.println("Génération aléatoire des scores et durées de visite :");
-		t1 = new Date();
-		generateScoresAndTimes(graph);
-		t2 = new Date();
-		System.out.println("Durée : " + (t2.getTime() - t1.getTime()) + "ms");*/
+	}
 
-		//boolean cheminsDejaCalcules = chargerPlusCourtsChemins(graph);
 
-		/*System.out.println("Chargement des coordonnées...");
-		t1 = new Date();
-		loadCoords(graph);
-		t2 = new Date();
-		System.out.println("Durée : " + (t2.getTime() - t1.getTime()) + "ms");
-		*/
-		/*
-		if(!cheminsDejaCalcules){
-			System.out.println("Echec de chargement du fichier des plus courts chemins.");
-			System.out.println("Calcul des plus courts chemins");
-			boolean sauvegardeReussie = false;
-			t1 = new Date();
-			sauvegardeReussie = computeShortestPaths(graph);
-			t2 = new Date();
-			System.out.println("Durée : " + (t2.getTime() - t1.getTime()) + "ms");
-			if(sauvegardeReussie){
-				System.out.println("Les plus courts chemins ont été sauvegardés avec succès.");
-			}else{
-				System.out.println("La sauvegarde des plus courts chemin a échoué.");
-			}
-		}
-		
-		else{
-			System.out.println("Plus courts chemins précalculés chargés.");
-		}*/
-		//showNetwork();
-		//DialogMap dm = new DialogMap("Saisie des Places", null, graph, 0, maxScore);
-		//dm.setVisible(true);
-		//if(dm.getResult()!=null){
-			//Place source = dm.getResult()[0];
-			//Place destination = dm.getResult()[1];
-			//if(source!=null && destination!=null){
 
-			//}
-			//else{System.out.println("Vous n'avez sélectionné aucune Place");
-		}
-
-	
-	
 	/*private void showNetwork(Graph graph){
 		/*for(Place s : graph.getListePlaces()){
 			//System.out.println(s.getNom() + " " + s.getCoords());
@@ -132,103 +83,9 @@ public class Solver {
 		return ms;
 	}*/
 
-	private boolean computeShortestPaths(){
-		int count = 0;
-		int tot = graph.getAllplaces().size();
-		for(Place depart : graph.getAllplaces()){
-			count++;
-			System.out.println("" + count + "/" + tot);
-			/*if(!Outils.neutraliser(depart.getNom(), true).equals("tertre")){
-				continue;
-			}
 
-			System.out.println("DEPART = " + depart);*/
-			HashMap<Place,Place> predecesseurs = new HashMap<Place, Place>();
-			HashMap<Place, Double> distances = new HashMap<Place, Double>();
-			HashMap<Place, ITIN> plusCourtsChemins = new HashMap<Place, ITIN>();
-			ArrayList<Place> nonVisites = new ArrayList<Place>(graph.getAllplaces());
-			ArrayList<Place> visites = new ArrayList<Place>();
 
-			for(Place s : graph.getAllplaces()){
-				if(s!=depart){
-					distances.put(s,Double.POSITIVE_INFINITY);
-					ITIN it = new ITIN(depart, NiveauTemps.TEMPS_MOY, s, NiveauTemps.TEMPS_MOY);
-					it.makeImpossible();
-					plusCourtsChemins.put(s, it);
-				}
-			}
-			distances.put(depart, 0.0);
-			Place pp=null;
-			while(nonVisites.size()>0){
-				pp = getPlusProche(distances, nonVisites);
-				if(pp!=null){
-					//System.out.println("Plus proche : " + pp);
-					// Collections.sort trie par ordre croissant (plus petit en 0)
-					Collections.sort(visites, new ComparateurPOI(pp, true));
-					boolean precNotFound = true;
-					int i=0;
-					Place prec;
-					// On parcours les points visites tries par distance relative à pp
-					// jusqu'à en trouver un qui soit dans les sommets atteignables de pp
-					// (il y en a forcément un, sinon pp serait à une distance infinie et getplusproche retournerai null)
-					// c'est ce point qui sera le prédecesseur de pp
-					while(precNotFound&&i<visites.size()){
-						prec = visites.get(i);
-						if(prec!=null&&prec.getSommetsAtteignables(graph).contains(pp)){
-							precNotFound = false;
-							ITIN shortestToPrec = plusCourtsChemins.get(prec);
-							ITIN shortestToPP;
-							if(shortestToPrec!=null)
-								shortestToPP = shortestToPrec.prolonger(pp,NiveauTemps.PAS_DE_VISITE);
-							else
-								shortestToPP = new ITIN(depart,NiveauTemps.TEMPS_MOY, pp,NiveauTemps.TEMPS_MOY);
-							plusCourtsChemins.put(pp, shortestToPP);
-						}
-						i++;
-					}
 
-					for(Place s2 : pp.getSommetsAtteignables(graph)){
-						double ds2 = distances.get(s2);
-						double dpp = distances.get(pp);
-						double ds2pp = pp.getPosition().distance(s2.getPosition());
-						if(ds2>dpp+ds2pp){
-							distances.put(s2, ds2pp + dpp);
-							predecesseurs.put(s2, pp);
-						}
-					}
-					nonVisites.remove(pp);
-					visites.add(pp);
-				}
-				else{
-					nonVisites.clear();
-				}
-			}	
-			depart.setPlusCourtsChemins(plusCourtsChemins);
-			predecesseurs.clear();
-			distances.clear();
-			nonVisites.clear();
-			nonVisites.trimToSize();
-			visites.clear();
-			visites.trimToSize();
-		}
-		return sauvegarderPlusCourtsChemins();
-	}
-
-	private Place getPlusProche(HashMap<Place, Double> distances, ArrayList<Place> nonVisites){
-		double dMin = Double.POSITIVE_INFINITY;
-		Place pp = null;
-		for(Place s : nonVisites){
-			double d = distances.get(s);
-			if(d!=Double.POSITIVE_INFINITY){
-				boolean dMinIsInf = dMin==Double.POSITIVE_INFINITY;
-				if(dMinIsInf||(!dMinIsInf&&d<dMin)){
-					dMin = d;
-					pp = s;
-				}
-			}
-		}
-		return pp;
-	}
 
 	/**
 	 * 
@@ -239,16 +96,10 @@ public class Solver {
 	 * @return
 	 */
 	public ITIN computeBestPath(){
-		File pccFile = new File(Emplacements.FICHIER_PCC(graph.getDispersion().getID()));
-		if(!pccFile.exists()){
-			System.out.println("Les pcc n'ont pas ete precalcules. Calcul...");
-			System.out.println("Succes = " + computeShortestPaths());
-		}else{
-			chargerPlusCourtsChemins();
-		}
+		
 		ITIN bestPath = null;
-		Place depart = graph.getUser().getDep();
-		Place arrivee = graph.getUser().getArr();
+		int indexDepart = graph.getAllplaces().indexOf(graph.getUser().getDep());
+		int indexArrivee = graph.getAllplaces().indexOf(graph.getUser().getArr());
 		int minutesDispo = graph.getUser().getTime();
 		int vitesse = graph.getUser().getSpeed();
 		// ----------------------------
@@ -265,8 +116,9 @@ public class Solver {
 
 		System.out.println("Recherche du meilleur chemin");
 		Date t3 = new Date();
-		double vitesseNecessaire = depart.getPlusCourtsChemins().get(arrivee).getDistTot()/(minutesDispo/60);
-		if(!g.getAllplaces().contains(arrivee)||vitesse<vitesseNecessaire){
+		System.out.println(graph.getTousPCC().get(indexDepart).get(graph.getUser().getArr()));
+		double vitesseNecessaire = graph.getTousPCC().get(indexDepart).get(graph.getAllplaces().get(indexArrivee)).getDistTot()/(minutesDispo/60);
+		if(!g.getAllplaces().contains(graph.getAllplaces().get(indexArrivee))||vitesse<vitesseNecessaire){
 			// Si l'arrivee n'est pas dans le rayon atteignable
 			// OU
 			// Si le plus court chemin entre depart et arrivee a une durée plus longue que le tps dispo
@@ -275,12 +127,12 @@ public class Solver {
 			System.out.println("L'arrivee demandée n'est pas atteignable dans le temps imparti. Vitesse nécessaire = " + vitesseNecessaire + " > " + vitesse);
 		}else{
 			System.out.println("Recherche du meilleur chemin...");
-			bestPath = new ITIN(depart,NiveauTemps.TEMPS_MOY, arrivee,NiveauTemps.TEMPS_MOY);
+			bestPath = new ITIN(graph.getAllplaces().get(indexDepart),NiveauTemps.TEMPS_MOY, graph.getAllplaces().get(indexArrivee),NiveauTemps.TEMPS_MOY);
 			//Classement des Places par score décroissant, classement des Places par duree de visite croissante.
 			ArrayList<Place> classementParScore = new ArrayList<Place>(g.getAllplaces());
 			ArrayList<Place> classementParDuree = new ArrayList<Place>(g.getAllplaces());
-			ComparateurPOI comparateurScore = new ComparateurPOI(POIproperties.SCORE, false);
-			ComparateurPOI comparateurDuree = new ComparateurPOI(POIproperties.DUREEVISITE, true);
+			ComparateurPlace comparateurScore = new ComparateurPlace(POIproperties.SCORE, false, g);
+			ComparateurPlace comparateurDuree = new ComparateurPlace(POIproperties.DUREEVISITE, true,g);
 			Collections.sort(classementParScore, comparateurScore);
 			Collections.sort(classementParDuree, comparateurDuree);		
 
@@ -290,12 +142,12 @@ public class Solver {
 				Place etapePotentielle = classementParScore.get(0);
 
 				// 7) Vérifier que la durée minimale de la visite de ce point est inférieure au temps restant
-				if(etapePotentielle.getTav()+bestPath.getDureeTot(vitesse)>minutesDispo){
+				if(etapePotentielle.getAverageTime()+bestPath.getDureeTot(vitesse)>minutesDispo){
 
 					//8) Calcul du temps minimal que prendrait un trajet ne visitant que ces points, en utilisant la base des distances précalculées.
 					ITIN newPath = null;
 					// s'il est possible de passer par cette etape potentielle et que le temps que cela prendrait est inferieur au temps dispo
-					if(bestPath.tryToGoBy(etapePotentielle,NiveauTemps.TEMPS_MOY, newPath)){ if (newPath.getDureeTot(vitesse)<=minutesDispo){
+					if(bestPath.tryToGoBy(etapePotentielle,NiveauTemps.TEMPS_MOY, newPath, this.graph)){ if (newPath.getDureeTot(vitesse)<=minutesDispo){
 						bestPath = newPath;					
 					}}// Dans tous les cas on a vérifié cette option donc on la supprime
 					classementParDuree.remove(etapePotentielle);
@@ -325,7 +177,7 @@ public class Solver {
 			}
 		}
 		//Date t4 = new Date();
-        //System.out.println("Durée : " + (t4.getTime() - t3.getTime()) + "ms");
+		//System.out.println("Durée : " + (t4.getTime() - t3.getTime()) + "ms");
 		//bestPath.ordonnerEtapes();
 		return bestPath;
 	}
@@ -361,30 +213,41 @@ public class Solver {
 	}*/
 
 
+
+
+
+
+
+	
+
 	public enum POIproperties {
 		SCORE(0),
 		DUREEVISITE(1),
 		DISTANCERELATIVE(2);
 		private final int propertyCode;
+
 		private POIproperties(int propertyCode) {
 			this.propertyCode = propertyCode;
 		}	
 	}
+	
+	public class ComparateurPlace implements Comparator<Place> {
 
-
-	private class ComparateurPOI implements Comparator<Place> {
-
+		
 		private POIproperties propertyCode;
 		private Place origin;
 		private boolean ordreCroissant;
+		private Graph graph;
 
-		public ComparateurPOI(POIproperties propertyCode, boolean ordreCroissant){
+		public ComparateurPlace(POIproperties propertyCode, boolean ordreCroissant, Graph graph){
+			this.graph = graph;
 			this.propertyCode = propertyCode;
 			this.origin = null;
 			this.ordreCroissant = ordreCroissant;
 		}
 
-		public ComparateurPOI(Place origin, boolean ordreCroissant){
+		public ComparateurPlace(Place origin, boolean ordreCroissant){
+			this.graph = null;
 			this.propertyCode = POIproperties.DISTANCERELATIVE;
 			this.origin = origin;
 			this.ordreCroissant = ordreCroissant;
@@ -396,11 +259,11 @@ public class Solver {
 			double property2;
 			switch (propertyCode)
 			{
-			case SCORE:property1 = s1.getBasicscore();property2 = s2.getBasicscore();break;
+			case SCORE:property1 = graph.getScores().get(s1);property2 = graph.getScores().get(s2);break;
 			case DISTANCERELATIVE:
 				property1 = origin.getPosition().distance(s1.getPosition());
 				property2 = origin.getPosition().distance(s2.getPosition());
-			default:property1 = s1.getTav();property2 = s2.getTav();break;	
+			default:property1 = s1.getAverageTime();property2 = s2.getAverageTime();break;	
 			}
 			if(property1==property2){result=0;}
 			else{
@@ -415,139 +278,4 @@ public class Solver {
 			return result;
 		}
 	}
-
-	private class Balises{
-		public static final String FROM_Begin = "<FROM=";
-		public static final String TO_Begin = "\t<TO=";
-		public static final String FROM_End = "</FROM>";
-		public static final String TO_End = "\t</TO>";
-		public static final String BY = "\t\t<BY=";
-	}
-
-	private boolean sauvegarderPlusCourtsChemins(){
-		boolean success = true;	
-		PrintWriter output=null;
-		System.out.println("Sauvegarde des plus courts chemin...");
-		try {
-			File f = new File(Emplacements.FICHIER_PCC(graph.getDispersion().getID()));
-			f.mkdirs();
-			output = new PrintWriter(new BufferedWriter(new FileWriter(Emplacements.FICHIER_PCC(graph.getDispersion().getID()))));
-			String line;
-			for(Place from : graph.getAllplaces()){
-				output.println(Balises.FROM_Begin +from.getId()+">");
-
-				for(Place to : graph.getAllplaces()){
-					if(!from.equals(to)){
-						output.println(Balises.TO_Begin+to.getId()+">");
-
-						ArrayList<Etape> etapes = from.getPlusCourtsChemins().get(to).getEtapes();
-						for(Etape etape : etapes){
-							if(!(etape.equals(to)||etape.equals(from)))
-								output.println(Balises.BY + etape.getPlace().getId()+">");
-						}
-						output.println(Balises.TO_End);
-					}
-				}
-				output.println(Balises.FROM_End);
-			}
-			System.out.println("OK.");			
-		}	    
-		catch (Exception e) {
-			System.out.println("Echec.");
-			success = false;
-		}finally {
-			try{
-				output.flush();
-				output.close();
-			}catch(Exception e){}
-		}
-		return success;
-	}
-
-	private boolean chargerPlusCourtsChemins(){
-		//if(graph.isCoordsLoaded()) throw new IllegalArgumentException("Graph coords must not be loaded before calling this method.");
-		boolean success = true;
-		
-		ArrayList<String> lines = new ArrayList<String>();
-		try {
-			BufferedReader input =  new BufferedReader(new FileReader(Emplacements.FICHIER_PCC(graph.getDispersion().getID())));
-			try {
-				String line = null; 
-
-				while (( line = input.readLine()) != null){
-					lines.add(line);
-				}
-			}
-			finally {
-				input.close();
-			}
-		}
-		catch (Exception ex){
-			success = false;
-		}
-
-		String line;
-		HashMap<Place,ITIN> plusCourtsChemins = null;
-		Place from=null;
-		int fromIndex=-1;
-		Place to=null;
-		int toIndex=-1;
-		Place by=null;
-		int byIndex=-1;
-		ITIN chem = null;
-
-		for(int i=0;i<lines.size()&&success; i++){
-			line = lines.get(i);
-			if(line.startsWith(Balises.FROM_Begin)){
-				int fromID = Integer.parseInt(line.substring(Balises.FROM_Begin.length(),line.length()-1));
-
-				///////////////////////////////////
-				from = new Place(graph,fromID);
-				fromIndex = graph.getAllplaces().indexOf(from);
-				if(fromIndex > -1){
-					plusCourtsChemins = new HashMap<Place, ITIN>();
-				}else{
-					plusCourtsChemins = null;
-				}
-			}
-			if(line.startsWith(Balises.TO_Begin)&&fromIndex > -1){
-				int toID = Integer.parseInt(line.substring(Balises.TO_Begin.length(),line.length()-1));
-				to = new Place(graph,toID);
-				toIndex = graph.getAllplaces().indexOf(to);
-				if(toIndex>-1){
-					chem = new ITIN(from, NiveauTemps.TEMPS_MOY,to, NiveauTemps.TEMPS_MOY);
-				}else{
-					chem = null;
-				}
-			}
-			if(line.startsWith(Balises.BY)&&fromIndex > -1&&toIndex>-1){
-				int byID = Integer.parseInt(line.substring(Balises.BY.length(),line.length()-1));
-				by = new Place(graph,byID);
-				byIndex = graph.getAllplaces().indexOf(by);
-				if(byIndex>-1){
-					chem.addEtape(by, NiveauTemps.PAS_DE_VISITE);
-				}else{
-					// Le fichier est corrompu (peut etre que le graphe a changé) 
-					//il faut recalculer les itineraire
-					success = false; 
-				}
-			}
-			if(line.startsWith(Balises.TO_End)&&fromIndex > -1&&toIndex>-1&&byIndex>-1){
-				plusCourtsChemins.put(to, chem);
-			}
-			if(line.startsWith(Balises.FROM_End)&&fromIndex > -1&&toIndex>-1&&byIndex>-1){
-				from.setPlusCourtsChemins(plusCourtsChemins);
-				plusCourtsChemins = null;
-				from=null;
-				fromIndex=-1;
-				to=null;
-				toIndex=-1;
-				by=null;
-				byIndex=-1;
-				chem = null;
-			}
-		}
-		return success;
-	}
-
 }

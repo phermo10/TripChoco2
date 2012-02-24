@@ -11,94 +11,43 @@ public class MonCompo extends Component{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private Graphique graph;
+	private ArrayList<Place> places;
 	private ITIN itin;
 
 		public void paint(Graphics arg0) { 
-			/*Graphics2D g = (Graphics2D)arg0; 
-			g.setColor(Color.blue);
-			for (Point p : this.graph.getMesPoints()){
-				g.fill3DRect((int)p.getX(),(int)p.getY(), 10, 10, true);
-			}
-			ArrayList<Point[]> edges = this.graph.getEdges();
-			System.out.println("this.graph.getEdges().size() : "+this.graph.getEdges().size());
-			System.out.println("this.graph.getDelaunayEdges().size() : "+this.graph.getDelaunayEdges().size());
-			System.out.println("MonCompo : zonesRegroupement.size() : "+this.graph.getZonesRegroupement().size());
-			for (Point[] arc : edges){
-				Point p1 = arc[0];
-				Point p2 = arc[1];
-				g.drawLine((int)p1.getX(),(int) p1.getY(), (int)p2.getX(),(int) p2.getY());
-			}
-			for (int i=0;i<this.graph.getCentreZonesRegroupement().size();i++){
-				int x=(int) this.graph.getCentreZonesRegroupement().get(i).getX();
-				int y=(int) this.graph.getCentreZonesRegroupement().get(i).getY();
-				g.drawOval(x-25,y-25,80,80);
-			}*/
 			Graphics2D g = (Graphics2D)arg0; 
 			g.setColor(Color.blue);
 
 			int n=0;
-			for (Point p : this.graph.getMesPoints()){
+			for (Place p1 : this.places){
 				n++;
-				g.fill3DRect((int)p.getX(),(int)p.getY(), 10, 10, true);
+				g.fill3DRect(p1.getPosition().x,p1.getPosition().y, 10, 10, true);
+				for(Path p : p1.getPathsFromThisPlace()){
+					g.drawLine(p.end1.getPosition().x,p.end1.getPosition().y,p.end2.getPosition().x,p.end2.getPosition().y);
+				}				
 			}
-			ArrayList<Point[]> edges = this.graph.getEdges();
-			System.out.println("this.graph.getEdges().size() : "+this.graph.getEdges().size());
-			//System.out.println("this.graph.getDelaunayEdges().size() : "+this.graph.getDelaunayEdges().size());
-			//System.out.println("MonCompo : zonesRegroupement.size() : "+this.graph.getZonesRegroupement().size());
-			for (Point[] arc : edges){
-				Point p1 = arc[0];
-				Point p2 = arc[1];
-				g.drawLine((int)p1.getX(),(int) p1.getY(), (int)p2.getX(),(int) p2.getY());
-			}
-
 			if (itin!=null){
 				g.setColor(Color.red);
 				for (int i=0;i<itin.getEtapes().size()-1;i++){
 					if(itin.getEtapes().get(i).getNiveauTemps()==NiveauTemps.TEMPS_MOY) g.setColor(Color.GREEN);
-					g.fill3DRect((int)itin.getEtapes().get(i).getPlace().getPosition().getX(),(int)itin.getEtapes().get(i).getPlace().getPosition().getY(), 10, 10, true);
-					g.drawLine((int)itin.getEtapes().get(i).getPlace().getPosition().getX(),(int)itin.getEtapes().get(i).getPlace().getPosition().getY(), (int)itin.getEtapes().get(i+1).getPlace().getPosition().getX(),(int)itin.getEtapes().get(i+1).getPlace().getPosition().getY());
+					g.fill3DRect(itin.getEtapes().get(i).getPlace().getPosition().x,itin.getEtapes().get(i).getPlace().getPosition().y, 10, 10, true);
+					g.drawLine(itin.getEtapes().get(i).getPlace().getPosition().x,itin.getEtapes().get(i).getPlace().getPosition().y, itin.getEtapes().get(i+1).getPlace().getPosition().x,itin.getEtapes().get(i+1).getPlace().getPosition().y);
+					g.setColor(Color.red);
 				}
-				g.fill3DRect((int)itin.getEtapes().get(itin.getEtapes().size()-1).getPlace().getPosition().getX(),(int)itin.getEtapes().get(itin.getEtapes().size()-1).getPlace().getPosition().getY(), 10, 10, true);
+				if(itin.getEtapes().get(itin.getEtapes().size()-1).getNiveauTemps()==NiveauTemps.TEMPS_MOY) g.setColor(Color.GREEN);
+				g.fill3DRect(itin.getEtapes().get(itin.getEtapes().size()-1).getPlace().getPosition().x,itin.getEtapes().get(itin.getEtapes().size()-1).getPlace().getPosition().y, 10, 10, true);
 			}
-
-
-			/*for (int i=0;i<this.graph.getCentreZonesRegroupement().size();i++){
-				int x=(int) this.graph.getCentreZonesRegroupement().get(i).getX();
-				int y=(int) this.graph.getCentreZonesRegroupement().get(i).getY();
-				g.drawOval(x-25,y-25,80,80);
-			}*/
-			/*int x1=(int) this.graph.getCentreZonesRegroupement().get(0).getX();
-			int y1=(int) this.graph.getCentreZonesRegroupement().get(0).getY();
-			g.drawOval(x1-25,y1-25,80,80);
-			int x2=(int) this.graph.getCentreZonesRegroupement().get(1).getX();
-			int y2=(int) this.graph.getCentreZonesRegroupement().get(1).getY();
-			g.drawOval(x2-25,y2-25,110,110);*/
 		}
 
 
-			//g.drawLine(50,50,100,100);
-			/*ArrayList<Point[]> edges = (ArrayList<Point[]>) delaunay.computeEdges();
-			for (int i=0;i<nbPoints;i++){
-				g.fill3DRect((int)mesPoints.get(i).getX(),(int)mesPoints.get(i).getY(), 10, 10, true);
-			}
-			for (int n=0;n<edges.size();n++){
-				//System.out.println(n);
-				g.drawLine((int)edges.get(n)[0].getX(), (int)edges.get(n)[0].getY(),(int)edges.get(n)[1].getX(),(int) edges.get(n)[1].getY());
-			}
-
-		}*/
-
-
-
-		public MonCompo(Graphique graph) {
+		public MonCompo(ArrayList<Place> places) {
 			super();
-			this.graph = graph;
+			this.places=places;
 			this.itin = null;
 		}
 		public MonCompo(Graphique graph, ITIN itin) {
 			super();
-			this.graph = graph;
+			this.places=places;
 			this.itin = itin;
 		}
 	}

@@ -17,29 +17,6 @@ public interface GraphInterface {
 	 */
 	public void setAllplaces(ArrayList<Place> places);
 	
-	/**
-	 * Adds a new place to the graph
-	 * @param p
-	 */
-	public void addPlace(Place p);
-	
-	/**
-	 * 
-	 * @return the list of all the paths the graph contains
-	 */
-	public ArrayList<Path> getAllpaths();
-	
-	/**
-	 * Sets a new arraylist of paths
-	 * @param paths
-	 */
-	public void setAllpaths(ArrayList<Path> paths);
-	
-	/**
-	 * Adds a new path to the graph
-	 * @param p
-	 */
-	public void addPath (Path p);
 	
 	/**
 	 * 
@@ -71,12 +48,6 @@ public interface GraphInterface {
 	 */
 	public void setUser(User user);
 	
-	/**
-	 * 
-	 * @param id
-	 * @return if the id was already set to a path, a place or a tag
-	 */
-	public boolean availableID(int id);
 	
 	/**
 	 * Changes the graph in order to ignore some places or paths
