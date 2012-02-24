@@ -57,18 +57,23 @@ public class CityGenerator {
 		// Sauvegarde des pcc
 		PrintWriter output=null;
 		output = new PrintWriter(new BufferedWriter(new FileWriter(Emplacements.FICHIER_PCC(gen.getID()))));
+		output.println("NBPOINTS");
 		output.println(gen.getPlaces().size());
 		for(Place from : gen.getPlaces()){
+			output.println("FROM");
 			output.println(from.getPosition().x);
 			output.println(from.getPosition().y);
 			for(Place to : gen.getPlaces()){
 				if(!from.equals(to)){
+					output.println("TO");
 					output.println(to.getPosition().x);
 					output.println(to.getPosition().y);
 					ITIN etapes = calc.getPCC().get(from).get(to);
+					output.println("NBETAPES");
 					output.println(etapes.getEtapes().size()-2);
 					for(Etape etape : etapes.getEtapes()){
 						if(!(etape.getPlace().equals(to)||etape.getPlace().equals(from))){
+							output.println("BY");
 							output.println(etape.getPlace().getPosition().x);
 							output.println(etape.getPlace().getPosition().y);
 						}
@@ -504,9 +509,11 @@ public class CityGenerator {
 			this.pcc = new HashMap<Place, HashMap<Place,ITIN>>();
 			// Chargement des PCC
 			BufferedReader input =  new BufferedReader(new FileReader(Emplacements.FICHIER_PCC(cityID)));
+			input.readLine();
 			int nbPoints = Integer.parseInt(input.readLine());
 			int i = 1;
 			while(i<=nbPoints){
+				input.readLine();
 				HashMap<Place,ITIN> plusCourtsChemins = new HashMap<Place, ITIN>();
 				int fromX = Integer.parseInt(input.readLine());
 				int fromY = Integer.parseInt(input.readLine());
@@ -514,15 +521,18 @@ public class CityGenerator {
 				Place from = places.get(places.indexOf(fromTmp));
 				int j = 1;
 				while(j<=nbPoints-1){
+					input.readLine();
 					int toX = Integer.parseInt(input.readLine());
 					int toY = Integer.parseInt(input.readLine());
 					Place toTmp = new Place(new Point(toX,toY),-1);
 					Place to = places.get(places.indexOf(toTmp));
 					ITIN chem = new ITIN(from, NiveauTemps.TEMPS_MOY, to, NiveauTemps.TEMPS_MOY);
+					input.readLine();
 					int nbEtapes = Integer.parseInt(input.readLine());
 					System.out.println(nbEtapes);
 					int k = 1;
 					while(k<=nbEtapes){
+						input.readLine();
 						int byX = Integer.parseInt(input.readLine());
 						System.out.println(byX);
 						int byY = Integer.parseInt(input.readLine());

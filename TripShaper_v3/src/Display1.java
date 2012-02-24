@@ -131,7 +131,7 @@ public class Display1 {
 		//Graph userGraph = new Graph(city.getTousPCC(),city.getPlaces(), new ArrayList<Tag>(), user,scores, city.getCityID(),city.getCityDiameter());
 
 		Graph userGraph;
-		if(true){
+		if(false){
 			userGraph = new Graph(1346,513);	
 		}else{
 			CityGenerator city = new CityGenerator(30,2);
